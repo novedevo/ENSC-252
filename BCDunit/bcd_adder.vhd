@@ -28,7 +28,7 @@ ARCHITECTURE Structure of bcd_adder is
             port map (A => A, B => B, Cin => cin, S => I, Cout => internalCout);
 
         OutputAdder : fourbitadd
-            port map (A(0) => '0', A(1) => coutBuffer, A(2) => coutBuffer, A(3) => '0', B => I, Cin => '0', S => F);
+            port map (A(0) => '0', A(1) => coutBuffer, A(2) => coutBuffer, A(3) => '0', B => I, Cin => '0', S => F, Cout => open);
 
         coutBuffer <=   (internalCout OR 
                         (I(3) AND I(2)) OR 
