@@ -19,6 +19,6 @@ Sim dir               :  simulation\modelsim
 
 Info: Starting NativeLink simulation with ModelSim-Altera software
 Sourced NativeLink script c:/intelfpga_lite/20.1/quartus/common/tcl/internal/nativelink/modelsim.tcl
-Warning: File bcdaddsub_4066_run_msim_rtl_vhdl.do already exists - backing up current file as bcdaddsub_4066_run_msim_rtl_vhdl.do.bak11
+Warning: File SevenSeg_run_msim_rtl_vhdl.do already exists - backing up current file as SevenSeg_run_msim_rtl_vhdl.do.bak
 Info: Spawning ModelSim-Altera Simulation software 
 Info: NativeLink simulation flow was successful

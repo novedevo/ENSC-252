@@ -50,7 +50,7 @@ sigX(2) <= '0', '1' after 80 ns, '0' after 160 ns, '1' after 240 ns;
 sigX(3) <= '0', '1' after 160 ns;
 
 
-wait for 320 ns;
+wait for 400 ns;
 
 --then set mode to 1 and redo it
 sigMode <= '1';
