@@ -37,43 +37,31 @@ ARCHITECTURE structure OF increment_control_unit IS
 BEGIN
 
     regObj : reg_4066 GENERIC MAP(data_width, N)
-    PORT MAP(clk => clk, reset => reset, inc => incr, ld => ldSig, D => regDsig, Q => regQsig)
-
-    PROCESS (reset) IS
-        IF (reset) THEN
-            regQsig <= to_unsigned('0', data_width);
-            regDSig <= to_unsigned('0', data_width);
-            ldSig <= '0';
-            sigD1 <= '0';
-            sigD2 <= '0';
-            sigFlagBack <= '0';
-            sigFlag <= '0';
-            incrRollbackSig <= '0';
-            --and more
-        END IF;
-    END PROCESS;
+    PORT MAP(clk => clk, reset => reset, inc => incr, ld => ldSig, D => regDsig, Q => regQsig);
 
     --IFL
     incrRollbackSig <= (rollback AND (NOT incr));
     ldSig <= incrRollbackSig;
 
     PROCESS (clk) IS --only needs clk because nothing that it points to is async
+    BEGIN
         IF (incrRollbackSig = '1') THEN
-            IF (Qsig = to_unsigned('0', data_width)) THEN
-                regDsig <= N;
+            IF (regQsig = 0) THEN
+                regDsig <= to_unsigned(N, data_width);
                 sigD1 <= '1';
             ELSE
-                regDsig <= (Qsig - to_unsigned('1', data_width));
+                regDsig <= (regQsig - 1);
                 sigD1 <= '0';
             END IF;
         ELSE
             sigD1 <= '0';
-            regDsig <= to_unsigned('0', data_width);
+            regDsig <= to_unsigned(0, data_width);
         END IF;
     END PROCESS;
 
     PROCESS (clk, reset) IS
-        IF (reset) THEN
+    BEGIN
+        IF (reset = '1') THEN
             sigFlagBack <= '0';
             sigFlag <= '0';
         END IF;
@@ -86,12 +74,19 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (rollback, incr, Qsig) IS
-        IF ((NOT rollback) AND incr AND (N = (Qsig + to_unsigned('1', data_width)))) THEN
+    PROCESS (rollback, incr, regQsig) IS
+    BEGIN
+        IF ((rollback = '0') AND (incr = '1') AND (N = (regQsig + 1))) THEN
             sigD2 <= '1';
         ELSE
             sigD2 <= '0';
         END IF;
     END PROCESS;
+
+    q <= regQsig;
+    flag <= sigFlag;
+    flag_back <= sigFlagBack;
+
+
 
 END structure;

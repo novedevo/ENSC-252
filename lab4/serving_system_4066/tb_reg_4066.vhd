@@ -25,7 +25,7 @@ BEGIN
 
     DUT : reg_4066
     GENERIC MAP(4, 9)
-    PORT MAP(sigclk, sigreset, siginc, sigld, sigD, sigQ)
+    PORT MAP(sigclk, sigreset, siginc, sigld, sigD, sigQ);
 
     PROCESS IS
     BEGIN
@@ -34,10 +34,10 @@ BEGIN
         sigclk <= '1';
         WAIT FOR 20 ns;
         sigclk <= '0';
-        sigreset <= 0;
+        sigreset <= '0';
         siginc <= '0';
         sigld <= '0';
-        sigD <= 0;
+        sigD <= to_unsigned(0, data_width);
         WAIT FOR 20 ns;
 
         LOOP
@@ -52,7 +52,7 @@ BEGIN
         WAIT FOR 20 ns;
 
         sigld <= '1';
-        sigD <= 5;
+        sigD <= to_unsigned(5, data_width);
         WAIT FOR 40 ns;
         sigld <= '0';
         WAIT FOR 20 ns;
@@ -67,6 +67,6 @@ BEGIN
         sigreset <= '0';
         WAIT FOR 20 ns;
 
-    END PROCESS
+    END PROCESS;
 
 END test;

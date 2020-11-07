@@ -33,7 +33,7 @@ ARCHITECTURE structure OF serving_system IS
 
     --signals
     SIGNAL dSig : UNSIGNED((3 * data_width) - 1 DOWNTO 0);
-    SIGNAL vectorDSig: std_logic_vector ((3 * data_width) - 1 DOWNTO 0);
+    SIGNAL vectorDSig : STD_LOGIC_VECTOR ((3 * data_width) - 1 DOWNTO 0);
 
 BEGIN
 
@@ -42,9 +42,7 @@ BEGIN
     counter : counter_chain GENERIC MAP(radix, data_width)
     PORT MAP(clk, reset, take_number, rollback, dSig);
 
-    seg0 : SevenSeg PORT MAP(vectorDSig(0 : (data_width - 1)), bcd0);
-    seg0 : SevenSeg PORT MAP(vectorDSig(data_width : (2*data_width - 1)), bcd1);
-    seg0 : SevenSeg PORT MAP(vectorDSig(2*data_width : (3*data_width - 1)), bcd2);
-
-    
+    seg0 : SevenSeg PORT MAP(vectorDSig((data_width - 1) DOWNTO 0), bcd0);
+    seg1 : SevenSeg PORT MAP(vectorDSig((2 * data_width - 1) DOWNTO data_width), bcd1);
+    seg2 : SevenSeg PORT MAP(vectorDSig((3 * data_width - 1) DOWNTO 2 * data_width), bcd2);
 END structure;
