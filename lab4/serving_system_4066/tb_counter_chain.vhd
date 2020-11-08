@@ -42,12 +42,36 @@ BEGIN
         sigreset <= '1';
         sigtake <= '0';
         sigrollback <= '0';
-        WAIT FOR 15 ns;
+        WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
         --test incrementing all the way up and overflowing, twice
+        --sigtake <= '1';
+        --WAIT FOR 2001 * PERIOD;
+        --sigtake <= '0';
+        --WAIT FOR PERIOD;
+
+        --test incrementing all the way up without overflowing
         sigtake <= '1';
-        WAIT FOR 2001 * PERIOD;
+        WAIT FOR 999 * PERIOD;
+        sigtake <= '0';
+        WAIT FOR PERIOD;
+
+        --test decrementing all the way down
+        sigrollback <= '1';
+        WAIT FOR 1000 * PERIOD;
+        sigrollback <= '0';
+        WAIT FOR PERIOD;
+
+        --test decrementing while at zero to ensure no overflow
+        sigrollback <= '1';
+        WAIT FOR 2 * PERIOD;
+        sigrollback <= '0';
+        WAIT FOR PERIOD;
+
+        --test incrementing once at zero
+        sigtake <= '1';
+        WAIT FOR PERIOD;
         sigtake <= '0';
         WAIT FOR PERIOD;
 

@@ -43,74 +43,96 @@ ARCHITECTURE structure OF counter_chain IS
     SIGNAL flagBackSig1 : STD_LOGIC;
     SIGNAL flagBackSig2 : STD_LOGIC;
 
-    SIGNAL numberSig0 : unsigned(data_width - 1 DOWNTO 0);
-    SIGNAL numberSig1 : unsigned(data_width - 1 DOWNTO 0);
-    SIGNAL numberSig2 : unsigned(data_width - 1 DOWNTO 0);
+    SIGNAL digit0 : unsigned(data_width - 1 DOWNTO 0);
+    SIGNAL digit1 : unsigned(data_width - 1 DOWNTO 0);
+    SIGNAL digit2 : unsigned(data_width - 1 DOWNTO 0);
 
     SIGNAL numberSig : UNSIGNED((3 * data_width) - 1 DOWNTO 0);
 
 BEGIN
 
-    numberSig <= (numberSig0 & numberSig1 & numberSig2); --concatenate
+    numberSig <= (digit2 & digit1 & digit0); --concatenate, hundreds then tens then ones
     number <= numberSig;
 
     --instantiate components
     ICU0 : increment_control_unit GENERIC MAP(radix, data_width)
     PORT MAP(
         clk => clk, reset => reset, incr => incrSig0, rollback => rollbackSig0,
-        flag => flagSig0, flag_back => flagBackSig0, q => numberSig0);
+        flag => flagSig0, flag_back => flagBackSig0, q => digit0);
 
     ICU1 : increment_control_unit GENERIC MAP(radix, data_width)
     PORT MAP(
         clk => clk, reset => reset, incr => incrSig1, rollback => rollbackSig1,
-        flag => flagSig1, flag_back => flagBackSig1, q => numberSig1);
+        flag => flagSig1, flag_back => flagBackSig1, q => digit1);
 
     ICU2 : increment_control_unit GENERIC MAP(radix, data_width)
     PORT MAP(
         clk => clk, reset => reset, incr => incrSig2, rollback => rollbackSig2,
-        flag => flagSig2, flag_back => flagBackSig2, q => numberSig2);
+        flag => flagSig2, flag_back => flagBackSig2, q => digit2);
 
-    PROCESS (take_number, flagSig0, flagSig1, flagSig2) IS
+    incrSig0 <= '1' WHEN (take_number = '1') ELSE
+        '0';
+
+    PROCESS (take_number, numberSig) IS
     BEGIN
+
         IF (take_number = '1') THEN
-            incrSig0 <= '1'; --always increment ones place when number is taken
+            IF (digit0 /= 9) THEN
+                incrSig1 <= '0';
+                incrSig2 <= '0';
+            ELSIF (digit0 = 9 AND digit1 /= 9) THEN
+                incrSig1 <= '1';
+                incrSig2 <= '0';
+            ELSe
+                incrSig1 <= '1';
+                incrSig2 <= '1';
+            END IF;
         ELSE
-            incrSig0 <= '0';
+            incrSig1 <= '0';
+            incrSig2 <= '0';
         END IF;
 
-        IF (flagSig0 = '1' AND flagSig1 = '0') THEN --number is X9 and swapping to (X+1)0, must increment tens
-            incrSig1 <= '1';
-            incrSig2 <= '0';
-        ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '0') THEN --number is X99 and swapping to (X+1)00, we must increment hundreds place
-            incrSig1 <= '0';
-            incrSig2 <= '1';
-        ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '1') THEN -- 999 swapping to 000
-            incrSig1 <= '0';
-            incrSig2 <= '0';
-        ELSIF (flagSig0 = '0') THEN --we don't need to increment anything in the tens or hundreds place
-            incrSig1 <= '0';
-            incrSig2 <= '0';
-        ELSE --shouldn't be possible?
-            incrSig1 <= '0';
-            incrSig2 <= '0';
-        END IF;
     END PROCESS;
+
+    --PROCESS (flagSig0, flagSig1, flagSig2) IS
+    --BEGIN
+    --    IF (flagSig0 = '1' AND flagSig1 = '0') THEN --number is X9 and swapping to (X+1)0, must increment tens
+    --        incrSig1 <= '1';
+    --        incrSig2 <= '0';
+    --    ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '0') THEN --number is X99 and swapping to (X+1)00, we must increment hundreds place
+    --        incrSig1 <= '0';
+    --        incrSig2 <= '1';
+    --    ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '1') THEN -- 999 swapping to 000
+    --        incrSig1 <= '0';
+    --        incrSig2 <= '0';
+    --    ELSIF (flagSig0 = '0') THEN --we don't need to increment anything in the tens or hundreds place
+    --        incrSig1 <= '0';
+    --        incrSig2 <= '0';
+    --    ELSE --shouldn't be possible?
+    --        incrSig1 <= '0';
+    --        incrSig2 <= '0';
+    --    END IF;
+    --END PROCESS;
     --
     PROCESS (rollback, numberSig) IS
     BEGIN
         IF (rollback = '1') THEN
-            IF (numberSig = 0) THEN
+            IF ((digit2 = 0) and (digit1 = 0) and (digit0 = 0)) THEN
                 rollBackSig0 <= '0';
                 rollBackSig1 <= '0';
                 rollBackSig2 <= '0';
-            ELSIF (numberSig <= 90 AND numberSig0 = 0) THEN
+            ELSIF ((digit2 = 0) and (digit1 /= 0) AND (digit0 = 0)) THEN
                 rollBackSig0 <= '1';
                 rollBackSig1 <= '1';
                 rollBackSig2 <= '0';
-            ELSIF ((numberSig >= 100) AND (numberSig0 = 0) AND (numberSig1 = 0)) THEN
+            ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 = 0)) THEN
                 rollBackSig0 <= '1';
                 rollBackSig1 <= '1';
                 rollBackSig2 <= '1';
+            ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 /= 0)) THEN
+                rollBackSig0 <= '1';
+                rollBackSig1 <= '1';
+                rollBackSig2 <= '0';
             ELSE
                 rollBackSig0 <= '1';
                 rollBackSig1 <= '0';
