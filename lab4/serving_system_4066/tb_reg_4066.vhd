@@ -66,7 +66,7 @@ BEGIN
         WAIT FOR PERIOD;
 
         --test resetting again, with set values
-        sigreset <= '0';
+        sigreset <= '1';
         WAIT FOR PERIOD;
 
         WAIT;

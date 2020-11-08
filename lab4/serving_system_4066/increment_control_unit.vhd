@@ -32,7 +32,6 @@ ARCHITECTURE structure OF increment_control_unit IS
     SIGNAL sigD2 : STD_LOGIC;
     SIGNAL sigFlag : STD_LOGIC;
     SIGNAL sigFlagBack : STD_LOGIC;
-    SIGNAL incrRollbackSig : STD_LOGIC;
 
 BEGIN
 
@@ -40,52 +39,40 @@ BEGIN
     PORT MAP(clk => clk, reset => reset, inc => incr, ld => ldSig, D => regDsig, Q => regQsig);
 
     --IFL
-    incrRollbackSig <= (rollback AND (NOT incr));
-    ldSig <= incrRollbackSig;
+    ldSig <= (rollback AND (NOT incr));
 
-    PROCESS (clk) IS --only needs clk because nothing that it points to is async
+
+    sigD1 <= '1' when ((rollback = '1') AND (incr = '0') and (regQsig = to_unsigned(0, data_width))) else '0';
+    sigD2 <= '1' when ((rollback = '0') AND (incr = '1') AND (N = (regQsig))) else '0';
+
+    PROCESS (rollback, incr, regQsig) IS --only needs clk because nothing that it points to is async
     BEGIN
-        IF (incrRollbackSig = '1') THEN
-            IF (regQsig = 0) THEN
+        IF ((rollback = '1') AND (incr = '0')) THEN
+            IF (regQsig = to_unsigned(0, data_width)) THEN
                 regDsig <= to_unsigned(N, data_width);
-                sigD1 <= '1';
             ELSE
                 regDsig <= (regQsig - 1);
-                sigD1 <= '0';
             END IF;
         ELSE
-            sigD1 <= '0';
             regDsig <= to_unsigned(0, data_width);
         END IF;
     END PROCESS;
 
-    PROCESS (clk, reset) IS
-    BEGIN
-        IF (reset = '1') THEN
-            sigFlagBack <= '0';
-            sigFlag <= '0';
-        END IF;
-        IF (rising_edge(clk)) THEN
-            sigFlagBack <= sigD1;
-            sigFlag <= sigD2;
-        ELSE
-            sigFlagBack <= sigFlagBack;
-            sigFlag <= sigFlag;
-        END IF;
-    END PROCESS;
+    --PROCESS (clk, reset) IS
+    --BEGIN
+    --    IF (reset = '1') THEN
+    --        sigFlag <= '0';
+    --    elsIF (rising_edge(clk)) THEN
+    --        sigFlag <= sigD2;
+    --    ELSE
+    --        sigFlag <= sigFlag;
+    --    END IF;
+    --END PROCESS;
 
-    PROCESS (rollback, incr, regQsig) IS
-    BEGIN
-        IF ((rollback = '0') AND (incr = '1') AND (N = (regQsig + 1))) THEN
-            sigD2 <= '1';
-        ELSE
-            sigD2 <= '0';
-        END IF;
-    END PROCESS;
 
     q <= regQsig;
-    flag <= sigFlag;
-    flag_back <= sigFlagBack;
+    flag_back <= sigD1;
+    flag <= sigD2;
 
 
 
