@@ -14,42 +14,24 @@ END reg_4066;
 
 ARCHITECTURE behaviour OF reg_4066 IS
 
---signals
+    --signals
     SIGNAL Qsig : unsigned(data_width - 1 DOWNTO 0);
-    SIGNAL muxSelSig : STD_LOGIC;
     SIGNAL muxOut0 : unsigned(data_width - 1 DOWNTO 0);
     SIGNAL muxOut1 : unsigned(data_width - 1 DOWNTO 0);
     SIGNAL muxOut2 : unsigned(data_width - 1 DOWNTO 0);
 
 BEGIN
+    --first muxer
+    muxOut0 <= (Qsig + to_unsigned(1, data_width)) WHEN (inc = '1') ELSE
+        Qsig;
 
-
-    PROCESS (inc, Qsig) IS
-    BEGIN
-        --first muxer
-        IF (inc = '1') THEN
-            muxOut0 <= (Qsig + to_unsigned(1, data_width));
-        ELSE
-            muxOut0 <= Qsig;
-        END IF;
-
-        --second muxer, equality checker, and and gate
-        IF (to_unsigned(N, data_width) = Qsig AND inc = '1') THEN
-            muxOut1 <= to_unsigned(0, data_width);
-        ELSE
-            muxOut1 <= muxOut0;
-        END IF;
-    END PROCESS;
+    --second muxer, equality checker, and and gate
+    muxOut1 <= to_unsigned(0, data_width) WHEN (to_unsigned(N, data_width) = Qsig AND inc = '1') ELSE
+        muxOut0;
 
     --third muxer
-    PROCESS (ld) IS
-    BEGIN
-        IF (ld = '1') THEN
-            muxOut2 <= (D);
-        ELSE
-            muxOut2 <= muxOut1;
-        END IF;
-    END PROCESS;
+    muxOut2 <= (D) WHEN (ld = '1') ELSE
+        muxOut1;
 
     --flipflops
     PROCESS (reset, clk) IS

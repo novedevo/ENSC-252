@@ -1,11 +1,12 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
-USE ieee.numeric_std.ALL;
+USE IEEE.numeric_std.ALL;
 
+--testbenches have empty entity sections
 ENTITY tb_reg_4066 IS
 END tb_reg_4066;
 
-ARCHITECTURE test OF reg_4066 IS
+ARCHITECTURE test OF tb_reg_4066 IS
 
     COMPONENT reg_4066 IS
         GENERIC (
@@ -18,6 +19,8 @@ ARCHITECTURE test OF reg_4066 IS
     END COMPONENT;
 
     --signals and constants
+    CONSTANT data_width : INTEGER := 4;
+    CONSTANT N : INTEGER := 9;
     CONSTANT HALF_PERIOD : TIME := 10 ns;
     CONSTANT PERIOD : TIME := 20 ns;
     SIGNAL sigQ, sigD : unsigned(data_width - 1 DOWNTO 0);
@@ -29,11 +32,11 @@ BEGIN
     DUT : reg_4066 GENERIC MAP(4, 9)
     PORT MAP(sigclk, sigreset, siginc, sigld, sigD, sigQ);
 
+    --to cycle clk for the duration of the test
+    sigclk <= NOT sigclk AFTER HALF_PERIOD;
+
     PROCESS IS
     BEGIN
-
-        --to cycle clk for the duration of the test
-        sigclk <= NOT sigclk AFTER HALF_PERIOD;
 
         --reset
         sigreset <= '1';
@@ -65,6 +68,7 @@ BEGIN
         --test resetting again, with set values
         sigreset <= '0';
         WAIT FOR PERIOD;
+
         WAIT;
 
     END PROCESS;
