@@ -17,9 +17,12 @@ ARCHITECTURE test OF reg_4066 IS
             Q : OUT UNSIGNED(data_width - 1 DOWNTO 0));
     END COMPONENT;
 
-    --signals
+    --signals and constants
+    CONSTANT HALF_PERIOD : TIME := 10 ns;
+    CONSTANT PERIOD : TIME := 20 ns;
     SIGNAL sigQ, sigD : unsigned(data_width - 1 DOWNTO 0);
-    SIGNAL sigclk, sigreset, siginc, sigld : STD_LOGIC;
+    SIGNAL sigclk : STD_LOGIC := '1';
+    SIGNAL sigreset, siginc, sigld : STD_LOGIC;
 
 BEGIN
 
@@ -29,43 +32,40 @@ BEGIN
 
     PROCESS IS
     BEGIN
+
+        --to cycle clk for the duration of the test
+        sigclk <= NOT sigclk AFTER HALF_PERIOD;
+
         --reset
         sigreset <= '1';
-        sigclk <= '1';
-        WAIT FOR 20 ns;
-        sigclk <= '0';
-        sigreset <= '0';
         siginc <= '0';
         sigld <= '0';
         sigD <= to_unsigned(0, data_width);
-        WAIT FOR 20 ns;
+        WAIT FOR 15 ns;
+        sigreset <= '0';
 
-        LOOP
-            --to cycle clk for the duration of the test
-            sigclk <= NOT sigclk AFTER 10 ns;
-        END LOOP;
-
-        --test incrementing all the way to 10 and back again
+        --test incrementing all the way up and overflowing, twice
         siginc <= '1';
-        WAIT FOR 20 * 20 ns;
+        WAIT FOR 20 * PERIOD;
         siginc <= '0';
-        WAIT FOR 20 ns;
+        WAIT FOR PERIOD;
 
+        --test loading
         sigld <= '1';
         sigD <= to_unsigned(5, data_width);
-        WAIT FOR 40 ns;
+        WAIT FOR 2 * PERIOD;
         sigld <= '0';
-        WAIT FOR 20 ns;
+        WAIT FOR PERIOD;
 
         --test incrementing all the way from a loaded starting place
         siginc <= '1';
-        WAIT FOR 20 * 20 ns;
+        WAIT FOR 10 * PERIOD;
         siginc <= '0';
-        WAIT FOR 20 ns;
+        WAIT FOR PERIOD;
 
-        --test resetting again
+        --test resetting again, with set values
         sigreset <= '0';
-        WAIT FOR 20 ns;
+        WAIT FOR PERIOD;
 
     END PROCESS;
 
