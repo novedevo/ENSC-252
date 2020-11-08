@@ -26,8 +26,7 @@ ARCHITECTURE test OF reg_4066 IS
 
 BEGIN
 
-    DUT : reg_4066
-    GENERIC MAP(4, 9)
+    DUT : reg_4066 GENERIC MAP(4, 9)
     PORT MAP(sigclk, sigreset, siginc, sigld, sigD, sigQ);
 
     PROCESS IS
@@ -66,6 +65,7 @@ BEGIN
         --test resetting again, with set values
         sigreset <= '0';
         WAIT FOR PERIOD;
+        WAIT;
 
     END PROCESS;
 
