@@ -70,91 +70,17 @@ BEGIN
         clk => clk, reset => reset, incr => incrSig2, rollback => rollbackSig2,
         flag => flagSig2, flag_back => flagBackSig2, q => digit2);
 
-
-
-    --PROCESS (take_number, numberSig) IS
-    --BEGIN
---
-    --    IF (take_number = '1') THEN
-    --        IF (digit0 /= 9) THEN
-    --            incrSig1 <= '0';
-    --            incrSig2 <= '0';
-    --        ELSIF (digit0 = 9 AND digit1 /= 9) THEN
-    --            incrSig1 <= '1';
-    --            incrSig2 <= '0';
-    --        ELSe
-    --            incrSig1 <= '1';
-    --            incrSig2 <= '1';
-    --        END IF;
-    --    ELSE
-    --        incrSig1 <= '0';
-    --        incrSig2 <= '0';
-    --    END IF;
---
-    --END PROCESS;
-
     incrSig0 <= (take_number or flagSig2);
 
     incrSig1 <= flagSig0;
 
     incrSig2 <= flagSig1;
 
-    --PROCESS (flagSig0, flagSig1, flagSig2) IS
-    --BEGIN
-    --    IF (flagSig0 = '1' AND flagSig1 = '0') THEN --number is X9 and swapping to (X+1)0, must increment tens
-    --        incrSig1 <= '1';
-    --        incrSig2 <= '0';
-    --    ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '0') THEN --number is X99 and swapping to (X+1)00, we must increment hundreds place
-    --        incrSig1 <= '0';
-    --        incrSig2 <= '1';
-    --    ELSIF (flagSig0 = '1' AND flagSig1 = '1' AND flagsig2 = '1') THEN -- 999 swapping to 000
-    --        incrSig1 <= '0';
-    --        incrSig2 <= '0';
-    --    ELSIF (flagSig0 = '0') THEN --we don't need to increment anything in the tens or hundreds place
-    --        incrSig1 <= '0';
-    --        incrSig2 <= '0';
-    --    ELSE --shouldn't be possible?
-    --        incrSig1 <= '0';
-    --        incrSig2 <= '0';
-    --    END IF;
-    --END PROCESS;
     
     rollBackSig0 <= '1' when ((rollback = '1') and (numberSig /= 0)) else '0';
     
     rollBackSig1 <= '1' when ((flagBackSig0 = '1') and (numberSig /= 0)) else '0';
 
     rollBackSig2 <= '1' when ((flagBackSig1 = '1') and (numberSig /= 0)) else '0';
-
-    --PROCESS (rollback, numberSig) IS
-    --BEGIN
-    --    IF (rollback = '1') THEN
-    --        IF ((digit2 = 0) and (digit1 = 0) and (digit0 = 0)) THEN
-    --            rollBackSig0 <= '0';
-    --            rollBackSig1 <= '0';
-    --            rollBackSig2 <= '0';
-    --        ELSIF ((digit2 = 0) and (digit1 /= 0) AND (digit0 = 0)) THEN
-    --            rollBackSig0 <= '1';
-    --            rollBackSig1 <= '1';
-    --            rollBackSig2 <= '0';
-    --        ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 = 0)) THEN
-    --            rollBackSig0 <= '1';
-    --            rollBackSig1 <= '1';
-    --            rollBackSig2 <= '1';
-    --        ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 /= 0)) THEN
-    --            rollBackSig0 <= '1';
-    --            rollBackSig1 <= '1';
-    --            rollBackSig2 <= '0';
-    --        ELSE
-    --            rollBackSig0 <= '1';
-    --            rollBackSig1 <= '0';
-    --            rollBackSig2 <= '0';
-    --        END IF;
---
-    --    ELSE
-    --        rollBackSig0 <= '0';
-    --        rollBackSig1 <= '0';
-    --        rollBackSig2 <= '0';
-    --    END IF;
-    --END PROCESS;
 
 END structure;

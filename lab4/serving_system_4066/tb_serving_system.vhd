@@ -65,15 +65,15 @@ BEGIN
         sigtake <= '0';
         WAIT FOR PERIOD;
 
-        --test incrementing all the way back up to prepare for the decrementing test
+        --test incrementing up to a number > 100 to prepare for decrementation
         sigtake <= '1';
-        WAIT FOR 999 * PERIOD;
+        WAIT FOR 111 * PERIOD;
         sigtake <= '0';
-        WAIT FOR PERIOD;
+        WAIT FOR 10*PERIOD;
 
         --test decrementing all the way down
         sigrollback <= '1';
-        WAIT FOR 1000 * PERIOD;
+        WAIT FOR 111 * PERIOD;
         sigrollback <= '0';
         WAIT FOR PERIOD;
 

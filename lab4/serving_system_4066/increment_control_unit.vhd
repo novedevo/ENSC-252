@@ -30,8 +30,6 @@ ARCHITECTURE structure OF increment_control_unit IS
     SIGNAL ldSig : STD_LOGIC;
     SIGNAL sigD1 : STD_LOGIC;
     SIGNAL sigD2 : STD_LOGIC;
-    SIGNAL sigFlag : STD_LOGIC;
-    SIGNAL sigFlagBack : STD_LOGIC;
 
 BEGIN
 
@@ -58,22 +56,8 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (clk, reset) IS
-    BEGIN
-        IF (reset = '1') THEN
-            sigFlag <= '0';
-        elsIF (rising_edge(clk)) THEN
-            sigFlag <= sigD2;
-        ELSE
-            sigFlag <= sigFlag;
-        END IF;
-    END PROCESS;
-
 
     q <= regQsig;
     flag_back <= sigD1;
     flag <= sigD2;
-
-
-
 END structure;
