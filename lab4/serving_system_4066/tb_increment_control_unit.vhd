@@ -43,7 +43,7 @@ BEGIN
         sigreset <= '1';
         sigincr <= '0';
         sigrollback <= '0';
-        WAIT FOR 15 ns;
+        WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
         --test incrementing all the way up and overflowing, twice

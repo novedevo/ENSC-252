@@ -43,7 +43,7 @@ BEGIN
         siginc <= '0';
         sigld <= '0';
         sigD <= to_unsigned(0, data_width);
-        WAIT FOR 15 ns;
+        WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
         --test incrementing all the way up and overflowing, twice
