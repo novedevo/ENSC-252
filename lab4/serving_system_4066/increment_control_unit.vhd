@@ -43,7 +43,7 @@ BEGIN
 
 
     sigD1 <= '1' when ((rollback = '1') AND (incr = '0') and (regQsig = to_unsigned(0, data_width))) else '0';
-    sigD2 <= '1' when ((rollback = '0') AND (incr = '1') AND (N = (regQsig+1))) else '0';
+    sigD2 <= '1' when ((rollback = '0') AND (incr = '1') AND (N = (regQsig))) else '0';
 
     PROCESS (rollback, incr, regQsig) IS --only needs clk because nothing that it points to is async
     BEGIN
@@ -72,7 +72,7 @@ BEGIN
 
     q <= regQsig;
     flag_back <= sigD1;
-    flag <= sigFlag;
+    flag <= sigD2;
 
 
 

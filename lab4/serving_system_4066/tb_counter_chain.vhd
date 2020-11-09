@@ -45,21 +45,21 @@ BEGIN
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
-        --test incrementing all the way up and overflowing, twice
-        --sigtake <= '1';
-        --WAIT FOR 2001 * PERIOD;
-        --sigtake <= '0';
-        --WAIT FOR PERIOD;
-
-        --test incrementing all the way up without overflowing
+        --test incrementing all the way up and all possible overflowing
         sigtake <= '1';
-        WAIT FOR 999 * PERIOD;
+        WAIT FOR 1000 * PERIOD;
         sigtake <= '0';
         WAIT FOR PERIOD;
 
+        --test incrementing up to a number > 100 to prepare for decrementation
+        sigtake <= '1';
+        WAIT FOR 111 * PERIOD;
+        sigtake <= '0';
+        WAIT FOR 10*PERIOD;
+
         --test decrementing all the way down
         sigrollback <= '1';
-        WAIT FOR 1000 * PERIOD;
+        WAIT FOR 111 * PERIOD;
         sigrollback <= '0';
         WAIT FOR PERIOD;
 

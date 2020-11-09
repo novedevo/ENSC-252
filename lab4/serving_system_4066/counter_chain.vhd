@@ -70,29 +70,34 @@ BEGIN
         clk => clk, reset => reset, incr => incrSig2, rollback => rollbackSig2,
         flag => flagSig2, flag_back => flagBackSig2, q => digit2);
 
-    incrSig0 <= '1' WHEN (take_number = '1') ELSE
-        '0';
 
-    PROCESS (take_number, numberSig) IS
-    BEGIN
 
-        IF (take_number = '1') THEN
-            IF (digit0 /= 9) THEN
-                incrSig1 <= '0';
-                incrSig2 <= '0';
-            ELSIF (digit0 = 9 AND digit1 /= 9) THEN
-                incrSig1 <= '1';
-                incrSig2 <= '0';
-            ELSe
-                incrSig1 <= '1';
-                incrSig2 <= '1';
-            END IF;
-        ELSE
-            incrSig1 <= '0';
-            incrSig2 <= '0';
-        END IF;
+    --PROCESS (take_number, numberSig) IS
+    --BEGIN
+--
+    --    IF (take_number = '1') THEN
+    --        IF (digit0 /= 9) THEN
+    --            incrSig1 <= '0';
+    --            incrSig2 <= '0';
+    --        ELSIF (digit0 = 9 AND digit1 /= 9) THEN
+    --            incrSig1 <= '1';
+    --            incrSig2 <= '0';
+    --        ELSe
+    --            incrSig1 <= '1';
+    --            incrSig2 <= '1';
+    --        END IF;
+    --    ELSE
+    --        incrSig1 <= '0';
+    --        incrSig2 <= '0';
+    --    END IF;
+--
+    --END PROCESS;
 
-    END PROCESS;
+    incrSig0 <= (take_number or flagSig2);
+
+    incrSig1 <= flagSig0;
+
+    incrSig2 <= flagSig1;
 
     --PROCESS (flagSig0, flagSig1, flagSig2) IS
     --BEGIN
@@ -113,37 +118,43 @@ BEGIN
     --        incrSig2 <= '0';
     --    END IF;
     --END PROCESS;
-    --
-    PROCESS (rollback, numberSig) IS
-    BEGIN
-        IF (rollback = '1') THEN
-            IF ((digit2 = 0) and (digit1 = 0) and (digit0 = 0)) THEN
-                rollBackSig0 <= '0';
-                rollBackSig1 <= '0';
-                rollBackSig2 <= '0';
-            ELSIF ((digit2 = 0) and (digit1 /= 0) AND (digit0 = 0)) THEN
-                rollBackSig0 <= '1';
-                rollBackSig1 <= '1';
-                rollBackSig2 <= '0';
-            ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 = 0)) THEN
-                rollBackSig0 <= '1';
-                rollBackSig1 <= '1';
-                rollBackSig2 <= '1';
-            ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 /= 0)) THEN
-                rollBackSig0 <= '1';
-                rollBackSig1 <= '1';
-                rollBackSig2 <= '0';
-            ELSE
-                rollBackSig0 <= '1';
-                rollBackSig1 <= '0';
-                rollBackSig2 <= '0';
-            END IF;
+    
+    rollBackSig0 <= '1' when ((rollback = '1') and (numberSig /= 0)) else '0';
+    
+    rollBackSig1 <= '1' when ((flagBackSig0 = '1') and (numberSig /= 0)) else '0';
 
-        ELSE
-            rollBackSig0 <= '0';
-            rollBackSig1 <= '0';
-            rollBackSig2 <= '0';
-        END IF;
-    END PROCESS;
+    rollBackSig2 <= '1' when ((flagBackSig1 = '1') and (numberSig /= 0)) else '0';
+
+    --PROCESS (rollback, numberSig) IS
+    --BEGIN
+    --    IF (rollback = '1') THEN
+    --        IF ((digit2 = 0) and (digit1 = 0) and (digit0 = 0)) THEN
+    --            rollBackSig0 <= '0';
+    --            rollBackSig1 <= '0';
+    --            rollBackSig2 <= '0';
+    --        ELSIF ((digit2 = 0) and (digit1 /= 0) AND (digit0 = 0)) THEN
+    --            rollBackSig0 <= '1';
+    --            rollBackSig1 <= '1';
+    --            rollBackSig2 <= '0';
+    --        ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 = 0)) THEN
+    --            rollBackSig0 <= '1';
+    --            rollBackSig1 <= '1';
+    --            rollBackSig2 <= '1';
+    --        ELSIF ((digit2 /= 0) AND (digit0 = 0) AND (digit1 /= 0)) THEN
+    --            rollBackSig0 <= '1';
+    --            rollBackSig1 <= '1';
+    --            rollBackSig2 <= '0';
+    --        ELSE
+    --            rollBackSig0 <= '1';
+    --            rollBackSig1 <= '0';
+    --            rollBackSig2 <= '0';
+    --        END IF;
+--
+    --    ELSE
+    --        rollBackSig0 <= '0';
+    --        rollBackSig1 <= '0';
+    --        rollBackSig2 <= '0';
+    --    END IF;
+    --END PROCESS;
 
 END structure;
