@@ -3,11 +3,13 @@ USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
 ENTITY sequencer IS
+    GENERIC (
+        data_width : INTEGER := 6;
+        N : INTEGER := 33);
     PORT (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
-        count : OUT unsigned
-    );
+        count : OUT unsigned);
 END sequencer;
 
 ARCHITECTURE behaviour OF sequencer IS
