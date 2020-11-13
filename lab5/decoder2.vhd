@@ -13,6 +13,6 @@ ARCHITECTURE behaviour OF decoder2 IS
     CONSTANT table : STD_LOGIC_VECTOR := "11101010001000101010111000111011101110000000";
 BEGIN
 
-    WaveOut <= table(to_integer(seq) - 1);
+    WaveOut <= table(to_integer(seq));
 
 END ARCHITECTURE;
