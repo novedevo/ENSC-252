@@ -2,10 +2,10 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-ENTITY tb_sequencer IS
+ENTITY tb_sequencer2 IS
 END ENTITY;
 
-ARCHITECTURE test OF tb_sequencer IS
+ARCHITECTURE test OF tb_sequencer2 IS
 
     COMPONENT sequencer IS
     GENERIC (

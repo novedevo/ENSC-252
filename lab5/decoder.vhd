@@ -4,12 +4,10 @@ USE ieee.numeric_std.ALL;
 
 ENTITY decoder IS
     GENERIC (
-        morse : STD_LOGIC_VECTOR
-    );
+        morse : STD_LOGIC_VECTOR);
     PORT (
         seq : IN unsigned;
-        WaveOut : OUT STD_LOGIC
-    );
+        WaveOut : OUT STD_LOGIC);
 END ENTITY;
 
 ARCHITECTURE behaviour OF decoder IS

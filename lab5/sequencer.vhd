@@ -20,12 +20,12 @@ BEGIN
     PROCESS (reset, clk) IS
     BEGIN
         IF (reset = '1') THEN
-            countSig <= to_unsigned(33, 6);
+            countSig <= to_unsigned(N, data_width);
         ELSIF (rising_edge(clk)) THEN
-            IF (countSig = to_unsigned(0, 6)) THEN
-                countSig <= to_unsigned(33, 6);
+            IF (countSig = to_unsigned(0, data_width)) THEN
+                countSig <= to_unsigned(N, data_width);
             ELSE
-                countSig <= countSig - to_unsigned(1, 6);
+                countSig <= countSig - to_unsigned(1, data_width);
             END IF;
         ELSE
             countSig <= countSig;
