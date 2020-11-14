@@ -23,18 +23,18 @@ ARCHITECTURE structural OF box IS
         PORT (
             clk : IN STD_LOGIC;
             reset : IN STD_LOGIC;
-            count : OUT unsigned);
+            count : OUT unsigned(data_width-1 DOWNTO 0));
     END COMPONENT;
 
     COMPONENT decoder IS
         GENERIC (
             morse : STD_LOGIC_VECTOR);
         PORT (
-            seq : IN unsigned;
+            seq : IN unsigned(data_width-1 DOWNTO 0);
             WaveOut : OUT STD_LOGIC);
     END COMPONENT;
 
-    SIGNAL countSig : unsigned;
+    SIGNAL countSig : unsigned(data_width-1 DOWNTO 0);
     SIGNAL waveSig : STD_LOGIC;
 
 BEGIN
@@ -45,6 +45,6 @@ BEGIN
     PORT MAP(countSig, waveSig);
 
     code_out <= waveSig WHEN (enable = '1') ELSE
-        0;
+        '0';
 
 END ARCHITECTURE;

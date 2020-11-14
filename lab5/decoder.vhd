@@ -6,11 +6,11 @@ ENTITY decoder IS
     GENERIC (
         morse : STD_LOGIC_VECTOR);
     PORT (
-        seq : IN unsigned;
+        seq : IN unsigned(5 DOWNTO 0);
         WaveOut : OUT STD_LOGIC);
 END ENTITY;
 
 ARCHITECTURE behaviour OF decoder IS
 BEGIN
-    WaveOut <= morse(to_integer(seq));
+    WaveOut <= morse((morse'length - 1) - to_integer(seq));
 END ARCHITECTURE;

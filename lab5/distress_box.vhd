@@ -14,7 +14,7 @@ END ENTITY;
 
 ARCHITECTURE structural OF distress_box IS
 
-    COMPONENT box1 IS
+    COMPONENT box IS
         GENERIC (
             data_width : INTEGER := 6;
             N : INTEGER := 33;

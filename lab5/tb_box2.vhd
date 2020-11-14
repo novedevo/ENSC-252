@@ -22,7 +22,7 @@ ARCHITECTURE test OF tb_box2 IS
     CONSTANT HALF_PERIOD : TIME := 10 ns;
     CONSTANT PERIOD : TIME := 20 ns;
 
-    SIGNAL sigclk : STD_LOGIC;
+    SIGNAL sigclk : STD_LOGIC := '1';
     SIGNAL sigreset : STD_LOGIC;
     SIGNAL sigenable : STD_LOGIC;
     SIGNAL sigcode_out : STD_LOGIC;
@@ -44,14 +44,14 @@ BEGIN
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
-        WAIT FOR half_period * 44; --to ensure looping works
+        WAIT FOR period * 44; --to ensure looping works
 
         --reset
         sigreset <= '1';
         sigenable <= '0';
-        WAIT FOR HALF_PERIOD;
+        WAIT FOR period;
         sigreset <= '0';
-
+wait;
     END PROCESS;
 
 END ARCHITECTURE;

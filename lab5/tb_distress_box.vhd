@@ -7,7 +7,7 @@ END ENTITY;
 
 ARCHITECTURE test OF tb_distress_box IS
 
-    COMPONENT box IS
+    COMPONENT distress_box IS
         PORT (
             clk : IN STD_LOGIC;
             reset : IN STD_LOGIC;
@@ -20,7 +20,7 @@ ARCHITECTURE test OF tb_distress_box IS
     CONSTANT HALF_PERIOD : TIME := 10 ns;
     CONSTANT PERIOD : TIME := 20 ns;
 
-    SIGNAL sigclk : STD_LOGIC;
+    SIGNAL sigclk : STD_LOGIC := '1';
     SIGNAL sigreset : STD_LOGIC;
     SIGNAL sigenable : STD_LOGIC;
     SIGNAL sigsel : STD_LOGIC;
@@ -43,7 +43,7 @@ BEGIN
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
-        WAIT FOR half_period * 34; --to ensure looping works
+        WAIT FOR period * 34; --to ensure looping works
 
         --reset
         sigreset <= '1';
@@ -51,7 +51,7 @@ BEGIN
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
-        WAIT FOR half_period * 5;
+        WAIT FOR period * 5;
 
         --reset
         sigreset <= '1';
@@ -60,14 +60,14 @@ BEGIN
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
 
-        WAIT FOR half_period * 44; --to ensure looping works
+        WAIT FOR period * 44; --to ensure looping works
 
         --reset
         sigreset <= '1';
         sigenable <= '0';
         WAIT FOR HALF_PERIOD;
         sigreset <= '0';
-
+wait;
     END PROCESS;
 
 END ARCHITECTURE;

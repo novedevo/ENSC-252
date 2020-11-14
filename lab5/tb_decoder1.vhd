@@ -18,7 +18,7 @@ ARCHITECTURE test OF tb_decoder1 IS
     CONSTANT HALF_PERIOD : TIME := 10 ns;
     CONSTANT PERIOD : TIME := 20 ns;
 
-    SIGNAL sigseq : unsigned;
+    SIGNAL sigseq : unsigned(5 DOWNTO 0);
     SIGNAL sigwave : STD_LOGIC;
 
 BEGIN

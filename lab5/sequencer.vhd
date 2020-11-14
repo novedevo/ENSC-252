@@ -9,12 +9,12 @@ ENTITY sequencer IS
     PORT (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
-        count : OUT unsigned);
+        count : OUT unsigned(data_width-1 DOWNTO 0));
 END sequencer;
 
 ARCHITECTURE behaviour OF sequencer IS
 
-    SIGNAL countSig : unsigned;
+    SIGNAL countSig : unsigned(data_width-1 DOWNTO 0);
 
 BEGIN
     PROCESS (reset, clk) IS
@@ -31,5 +31,7 @@ BEGIN
             countSig <= countSig;
         END IF;
     END PROCESS;
+
+count <= countSig;
 
 END behaviour;
