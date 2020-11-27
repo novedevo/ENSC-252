@@ -16,13 +16,7 @@ ARCHITECTURE structure OF matrix_multiplication_unit IS
     SIGNAL state : t_MMU_STATE;
     SIGNAL clksig : STD_LOGIC;
 
-    SIGNAL ldsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL ld_wsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL a_insig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL w_insig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL part_insig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL a_outsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
-    SIGNAL partial_sumsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
+    SIGNAL ldsig, ld_wsig, a_insig, w_insig, part_insig, a_outsig, partial_sumsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
 
     COMPONENT processing_element IS
         PORT (

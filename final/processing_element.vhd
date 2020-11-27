@@ -10,37 +10,37 @@ ENTITY processing_element IS
 END ENTITY;
 
 ARCHITECTURE structure OF processing_element IS
-    SIGNAL Asig : UNSIGNED (7 DOWNTO 0);
-    SIGNAL Ysig : UNSIGNED (7 DOWNTO 0);
-    SIGNAL Wsig : UNSIGNED (7 DOWNTO 0);
+    --signals
+    SIGNAL Asig, Ysig, Wsig, rounded : UNSIGNED (7 DOWNTO 0);
     SIGNAL mac : UNSIGNED (15 DOWNTO 0);
-    signal rounded : UNSIGNED (7 DOWNTO 0);
 BEGIN
 
---multiply a by the weight element, then add the previous partial sum
-mac <= (Wsig * a_in) + part_in;
+    --multiply a by the weight element, then add the previous partial sum
+    mac <= (Wsig * a_in) + part_in;
 
---if mac overflows, round it off to 111111
-rounded <= mac(7 downto 0) when mac(15 downto 8) = to_unsigned(0, 8) else to_unsigned(255, 8);
+    --if mac overflows, round it off to 111111
+    rounded <= mac(7 DOWNTO 0) WHEN mac(15 DOWNTO 8) = to_unsigned(0, 8) ELSE to_unsigned(255, 8);
 
-process (clk, reset, hard_reset)
-begin
-    if hard_reset = '1' then
-        Asig <= to_unsigned(0, 8);
-        Ysig <= to_unsigned(0, 8);
-        Wsig <= to_unsigned(0, 8);
-    elsif reset = '1' then
-        --do not reset the weight matrix
-        Asig <= to_unsigned(0, 8);
-        Ysig <= to_unsigned(0, 8);
-    elsif rising_edge(clk) then
-        Wsig <= w_in when ld_w = '1' else Wsig;
-        Asig <= a_in when ld = '1' else Asig;
-        Ysig <= rounded;
-    end if;
-end process;
+    PROCESS (clk, reset, hard_reset)
+    BEGIN
+        IF hard_reset = '1' THEN
+            Asig <= to_unsigned(0, 8);
+            Ysig <= to_unsigned(0, 8);
+            Wsig <= to_unsigned(0, 8);
+        ELSIF reset = '1' THEN
+            --do not reset the weight matrix
+            Asig <= to_unsigned(0, 8);
+            Ysig <= to_unsigned(0, 8);
+        ELSIF rising_edge(clk) THEN
+            Wsig <= w_in WHEN ld_w = '1' ELSE
+                Wsig;
+            Asig <= a_in WHEN ld = '1' ELSE
+                Asig;
+            Ysig <= rounded;
+        END IF;
+    END PROCESS;
 
-a_out <= Asig;
-partial_sum <= Ysig;
+    a_out <= Asig;
+    partial_sum <= Ysig;
 
 END structure;

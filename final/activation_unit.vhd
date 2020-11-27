@@ -14,9 +14,7 @@ END ENTITY;
 ARCHITECTURE structure OF activation_unit IS
 
     SIGNAL state : INTEGER RANGE 0 TO 9;
-    SIGNAL sigRow0 : bus_width;
-    SIGNAL sigRow1 : bus_width;
-    SIGNAL sigRow2 : bus_width;
+    SIGNAL sigRow0, sigRow1, sigRow2 : bus_width;
 
 BEGIN
 
