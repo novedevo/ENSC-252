@@ -13,43 +13,41 @@ END ENTITY;
 
 ARCHITECTURE structure OF activation_unit IS
 
-SIGNAL state: integer range 0 to 9;
-signal sigRow0 : bus_width;
-signal sigRow1 : bus_width;
-signal sigRow2 : bus_width;
+    SIGNAL state : INTEGER RANGE 0 TO 9;
+    SIGNAL sigRow0 : bus_width;
+    SIGNAL sigRow1 : bus_width;
+    SIGNAL sigRow2 : bus_width;
 
 BEGIN
 
-    PROCESS (clk, reset, hard_reset, stall)
+    PROCESS (clk, reset, hard_reset, stall) IS
     BEGIN
-        IF (hard_reset = '1' or reset = '1') THEN
+        IF (hard_reset = '1' OR reset = '1') THEN
             state <= 0;
-        ELSIF (rising_edge(clk) and stall = '0') THEN
+        ELSIF (rising_edge(clk) AND stall = '0') THEN
             state <= state + 1;
-        else
+        ELSE
             state <= state;
         END IF;
     END PROCESS;
 
-    sigRow0(0) <= y_in0 when state = 4;
+    sigRow0(0) <= y_in0 WHEN state = 4;
 
-    sigRow0(1) <= y_in1 when state = 5;
-    sigRow1(0) <= y_in0 when state = 5;
+    sigRow0(1) <= y_in1 WHEN state = 5;
+    sigRow1(0) <= y_in0 WHEN state = 5;
 
-    sigRow0(2) <= y_in2 when state = 6;
-    sigRow1(1) <= y_in1 when state = 6;
-    sigRow2(0) <= y_in0 when state = 6;
+    sigRow0(2) <= y_in2 WHEN state = 6;
+    sigRow1(1) <= y_in1 WHEN state = 6;
+    sigRow2(0) <= y_in0 WHEN state = 6;
 
-    sigRow1(2) <= y_in2 when state = 7;
-    sigRow2(1) <= y_in1 when state = 7;
+    sigRow1(2) <= y_in2 WHEN state = 7;
+    sigRow2(1) <= y_in1 WHEN state = 7;
 
-    sigRow2(2) <= y_in0 when state = 8;
+    sigRow2(2) <= y_in0 WHEN state = 8;
 
-    done <= '1' when state = 9;
+    done <= '1' WHEN state = 9;
 
     row0 <= sigRow0;
     row1 <= sigRow1;
     row2 <= sigRow2;
-
-
 END structure;

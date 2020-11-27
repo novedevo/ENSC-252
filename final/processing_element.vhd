@@ -17,8 +17,10 @@ ARCHITECTURE structure OF processing_element IS
     signal rounded : UNSIGNED (7 DOWNTO 0);
 BEGIN
 
+--multiply a by the weight element, then add the previous partial sum
 mac <= (Wsig * a_in) + part_in;
 
+--if mac overflows, round it off to 111111
 rounded <= mac(7 downto 0) when mac(15 downto 8) = to_unsigned(0, 8) else to_unsigned(255, 8);
 
 process (clk, reset, hard_reset)
@@ -28,6 +30,7 @@ begin
         Ysig <= to_unsigned(0, 8);
         Wsig <= to_unsigned(0, 8);
     elsif reset = '1' then
+        --do not reset the weight matrix
         Asig <= to_unsigned(0, 8);
         Ysig <= to_unsigned(0, 8);
     elsif rising_edge(clk) then
@@ -39,6 +42,5 @@ end process;
 
 a_out <= Asig;
 partial_sum <= Ysig;
-
 
 END structure;
