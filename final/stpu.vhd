@@ -55,15 +55,31 @@ ARCHITECTURE structure OF stpu IS
     END COMPONENT;
 
     --signals
-    signal donesig, mmuLdSig, mmuLdWSig : std_logic;
-    signal y0sig, y1sig, y2sig, w0sig, w1sig, w2sig, a0sig, a1sig, a2sig : unsigned(7 downto 0);
-    
+    SIGNAL donesig, mmuLdSig, mmuLdWSig : STD_LOGIC;
+    SIGNAL y0sig, y1sig, y2sig, w0sig, w1sig, w2sig, a0sig, a1sig, a2sig : unsigned(7 DOWNTO 0);
+
+    signal uclr0, uclr1, uclr2, urden0, urden1, urden2, uwren0, uwren1, uwren2, wclr, wrden, wwren : STD_LOGIC;
+    signal uaddr0, uaddr1, uaddr2, waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    signal udata0, udata1, udata2, uq1, uq2, uq0 : STD_LOGIC_VECTOR(7 downto 0);
+    signal wdata, w1 : STD_LOGIC_VECTOR(23 DOWNTO 0);
+
 BEGIN
 
+    --instantiate components
     au : activation_unit
-    PORT MAP(clk, reset, hard_reset, stall, donesig, y0sig, y1sig, y2sig, row0sig, row1sig, row2sig);
+    PORT MAP(clk, reset, hard_reset, stall, donesig, y0sig, y1sig, y2sig, y0, y1, y2);
 
     mmu : matrix_multiplication_unit
     PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, stall, a0sig, a1sig, a2sig, w0sig, w1sig, w2sig, y0sig, y1sig, y2sig);
+
+    u0 : uram
+    PORT MAP(uclr0, uaddr0, clk, udata0, urden0, uwren0, uq0);
+    u1 : uram
+    PORT MAP(uclr1, uaddr1, clk, udata1, urden1, uwren1, uq1);
+    u2 : uram
+    PORT MAP(uclr2, uaddr2, clk, udata2, urden2, uwren2, uq2);
+
+    w : wram
+    PORT MAP(wclr, waddr, clk, wdata, wrden, wwren, wq);
 
 END structure;
