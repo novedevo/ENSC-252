@@ -57,19 +57,21 @@ ARCHITECTURE structure OF stpu IS
     --signals
 
     SIGNAL mode : t_MODE_STATE;
-    SIGNAL loaded_weight : t_WEIGHT_STATE;
+    SIGNAL ramLoaded : t_WEIGHT_STATE;
+    SIGNAL wLoaded : INTEGER;
 
     SIGNAL donesig, mmuLdSig, mmuLdWSig : STD_LOGIC;
-    SIGNAL y0sig, y1sig, y2sig, w0sig, w1sig, w2sig, a0sig, a1sig, a2sig : unsigned(7 DOWNTO 0);
+    SIGNAL ysig, wsig, asig : bus_width;
 
     SIGNAL resetSig : STD_LOGIC;
 
     --consider setting all these to 0 initially
-    signal uwren, urden : std_logic_vector(2 downto 0);
+    SIGNAL uwren, urden : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    SIGNAL uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0);
     SIGNAL wrden, wwren : STD_LOGIC;
-    SIGNAL uaddr0, uaddr1, uaddr2, waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
-    SIGNAL udata0, udata1, udata2, uq1, uq2, uq0 : STD_LOGIC_VECTOR(7 DOWNTO 0);
-    SIGNAL wdata, w1 : STD_LOGIC_VECTOR(23 DOWNTO 0);
+    SIGNAL waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL uq1, uq2, uq0 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL wdata, wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
 
 BEGIN
 
@@ -77,50 +79,67 @@ BEGIN
 
     --instantiate components
     au : activation_unit
-    PORT MAP(clk, reset, hard_reset, stall, donesig, y0sig, y1sig, y2sig, y0, y1, y2);
+    PORT MAP(clk, reset, hard_reset, stall, donesig, ysig(0), ysig(1), ysig(2), y0, y1, y2);
 
     mmu : matrix_multiplication_unit
-    PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, stall, a0sig, a1sig, a2sig, w0sig, w1sig, w2sig, y0sig, y1sig, y2sig);
+    PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, stall, asig(0), asig(1), asig(2), wsig(0), wsig(1), wsig(2), ysig(0), ysig(1), ysig(2));
 
     u0 : uram
-    PORT MAP(resetSig, uaddr0, clk, a_in(7 downto 0), urden(0), uwren(0), uq0);
+    PORT MAP(resetSig, uaddr(1 DOWNTO 0), clk, std_logic_vector(a_in(7 DOWNTO 0)), urden(0), uwren(0), uq0);
     u1 : uram
-    PORT MAP(resetSig, uaddr1, clk, a_in(15 downto 8), urden(1), uwren(1), uq1);
+    PORT MAP(resetSig, uaddr(3 DOWNTO 2), clk, std_logic_vector(a_in(15 DOWNTO 8)), urden(1), uwren(1), uq1);
     u2 : uram
-    PORT MAP(resetSig, uaddr2, clk, a_in(23 downto 16), urden(2), uwren(2), uq2);
+    PORT MAP(resetSig, uaddr(5 DOWNTO 4), clk, std_logic_vector(a_in(23 DOWNTO 16)), urden(2), uwren(2), uq2);
 
     w : wram
-    PORT MAP(hard_reset, waddr, clk, weights, wrden, wwren, wq);
+    PORT MAP(hard_reset, waddr, clk, std_logic_vector(weights), wrden, wwren, wq);
 
     PROCESS (clk, reset, hard_reset) IS
     BEGIN
         IF (hard_reset = '1') THEN
-            loaded_weight <= none;
+            ramLoaded <= none;
             mode <= idle;
         ELSIF (reset = '1') THEN
             mode <= idle;
 
         ELSIF (falling_edge(clk)) THEN --falling edge to align it better with the sram
 
-            IF (setup = '1' AND (mode = idle OR mode = go)) THEN
-                mode <= setup;
+            IF (setup = '1' AND (mode = idle)) THEN
+                mode <= t_setup;
                 wwren <= '1';
-                loaded_weight <= first;
+                ramLoaded <= first;
                 waddr <= "00";
 
                 uwren <= "111";
-                udata0 <= a_in(7 downto 0);
+                uaddr <= "000000";
 
-            elsif (mode = setup and loaded_weight = first) then
+            ELSIF (mode = t_setup AND ramLoaded = first) THEN
                 waddr <= "01";
-                loaded_weight <= second;
-            elsif (mode = setup and loaded_weight = second) then
+                uaddr <= "010101";
+                ramLoaded <= second;
+            ELSIF (mode = t_setup AND ramLoaded = second) THEN
                 waddr <= "10";
-                loaded_weight <= done;
+                uaddr <= "101010";
+                ramLoaded <= done;
+
+            ELSIF (mode = t_setup AND ramLoaded = done) THEN
+                waddr <= "00";
+                uaddr <= "000000";
+                wwren <= '0';
+                uwren <= "000";
+                mode <= idle;
             END IF;
 
+            IF (go = '1' AND mode = idle) THEN
+                mode <= t_go;
+                mmuLdWSig <= '1';
 
-
+                wsig(0) <= unsigned(uq0);
+                wLoaded <= 1;
+            ELSIF (mode = t_go AND wLoaded = 1) THEN
+                wsig(0) <= unsigned(uq1);
+                wsig(1) <= unsigned(uq0);
+            END IF;
         END IF;
     END PROCESS;
 

@@ -16,7 +16,8 @@ ARCHITECTURE structure OF matrix_multiplication_unit IS
     SIGNAL state : t_MMU_STATE;
     SIGNAL clksig : STD_LOGIC;
 
-    SIGNAL ldsig, ld_wsig, a_insig, w_insig, part_insig, a_outsig, partial_sumsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
+    SIGNAL ldsig, ld_wsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
+    signal a_insig, w_insig, part_insig, a_outsig, partial_sumsig : pe_bus;
 
     COMPONENT processing_element IS
         PORT (
@@ -46,12 +47,12 @@ BEGIN
     ld_wsig(8 DOWNTO 6) <= "111" WHEN state = load_col2 ELSE "000";
     
     --apply the input weights to all elements in each row so that they can be latched by the PEs when ld_w is called
-    w_insig(2 DOWNTO 0) <= (w2 & w1 & w0);
-    w_insig(5 DOWNTO 3) <= (w2 & w1 & w0);
-    w_insig(8 DOWNTO 6) <= (w2 & w1 & w0);
+    w_insig(2 DOWNTO 0) <= (w2, w1, w0);
+    w_insig(5 DOWNTO 3) <= (w2, w1, w0);
+    w_insig(8 DOWNTO 6) <= (w2, w1, w0);
 
     --map the a signals to their correct locations
-    a_insig(2 DOWNTO 0) <= (a2 & a1 & a0);
+    a_insig(2 DOWNTO 0) <= (a2, a1, a0);
     a_insig(5 DOWNTO 3) <= a_outsig(2 DOWNTO 0);
     a_insig(8 DOWNTO 6) <= a_outsig(5 DOWNTO 3);
     --nothing to do with a_outsig(2 downto 0); they are left open.

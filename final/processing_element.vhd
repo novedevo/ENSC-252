@@ -19,7 +19,8 @@ BEGIN
     mac <= (Wsig * a_in) + part_in;
 
     --if mac overflows, round it off to 111111
-    rounded <= mac(7 DOWNTO 0) WHEN mac(15 DOWNTO 8) = to_unsigned(0, 8) ELSE to_unsigned(255, 8);
+    rounded <= mac(7 DOWNTO 0) WHEN mac(15 DOWNTO 8) = to_unsigned(0, 8) ELSE
+        to_unsigned(255, 8);
 
     PROCESS (clk, reset, hard_reset)
     BEGIN
@@ -32,10 +33,14 @@ BEGIN
             Asig <= to_unsigned(0, 8);
             Ysig <= to_unsigned(0, 8);
         ELSIF rising_edge(clk) THEN
-            Wsig <= w_in WHEN ld_w = '1' ELSE
-                Wsig;
-            Asig <= a_in WHEN ld = '1' ELSE
-                Asig;
+            IF (ld_w = '1') THEN
+                Wsig <= w_in;
+            END IF;
+            IF (ld = '1') THEN
+                Asig <= a_in;
+            END IF;
+            --Wsig <= w_in WHEN (ld_w = '1');
+            --Asig <= a_in WHEN (ld = '1');
             Ysig <= rounded;
         END IF;
     END PROCESS;
