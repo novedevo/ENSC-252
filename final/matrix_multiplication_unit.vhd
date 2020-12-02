@@ -14,7 +14,7 @@ END ENTITY;
 ARCHITECTURE structure OF matrix_multiplication_unit IS
 
     SIGNAL state : t_MMU_STATE;
-    SIGNAL clksig : STD_LOGIC;
+    --SIGNAL clksig : STD_LOGIC;
 
     SIGNAL ldsig, ld_wsig : STD_LOGIC_VECTOR(8 DOWNTO 0);
     signal a_insig, w_insig, part_insig, a_outsig, partial_sumsig : pe_bus;
