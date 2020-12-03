@@ -58,32 +58,35 @@ ARCHITECTURE structure OF stpu IS
 
     SIGNAL mode : t_MODE_STATE;
     SIGNAL ramLoaded : t_WEIGHT_STATE;
-    SIGNAL wLoaded : INTEGER;
+    SIGNAL wLoaded : INTEGER := 0;
 
     SIGNAL donesig, mmuLdSig, mmuLdWSig : STD_LOGIC;
     SIGNAL ysig, wsig, asig : bus_width;
 
     SIGNAL resetSig : STD_LOGIC;
 
+    SIGNAL mmuStallSig : STD_LOGIC := '1';
+    SIGNAL auStallSig : STD_LOGIC := '1';
+
     --consider setting all these to 0 initially
     SIGNAL uwren, urden : STD_LOGIC_VECTOR(2 DOWNTO 0);
     SIGNAL uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0);
     SIGNAL wrden, wwren : STD_LOGIC;
     SIGNAL waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
-    SIGNAL uq1, uq2, uq0 : STD_LOGIC_VECTOR(7 DOWNTO 0);
-    SIGNAL wdata, wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
+    SIGNAL uq0, uq1, uq2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
 
 BEGIN
 
     resetSig <= reset OR hard_reset;
-    wsig <= (unsigned(wq(7 downto 0)), unsigned(wq(15 downto 8)), unsigned(wq(23 downto 16)));
+    wsig <= (unsigned(wq(7 DOWNTO 0)), unsigned(wq(15 DOWNTO 8)), unsigned(wq(23 DOWNTO 16)));
 
     --instantiate components
     au : activation_unit
-    PORT MAP(clk, reset, hard_reset, stall, donesig, ysig(0), ysig(1), ysig(2), y0, y1, y2);
+    PORT MAP(clk, reset, hard_reset, auStallSig, donesig, ysig(0), ysig(1), ysig(2), y0, y1, y2);
 
     mmu : matrix_multiplication_unit
-    PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, stall, asig(0), asig(1), asig(2), wsig(0), wsig(1), wsig(2), ysig(0), ysig(1), ysig(2));
+    PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, mmuStallSig, asig(0), asig(1), asig(2), wsig(0), wsig(1), wsig(2), ysig(0), ysig(1), ysig(2));
 
     u0 : uram
     PORT MAP(resetSig, uaddr(1 DOWNTO 0), clk, STD_LOGIC_VECTOR(a_in(7 DOWNTO 0)), urden(0), uwren(0), uq0);
@@ -99,7 +102,17 @@ BEGIN
     BEGIN
         IF (hard_reset = '1') THEN
             ramLoaded <= none;
+            mmuLdWSig <= '0';
+            mmuLdSig <= '0';
             mode <= idle;
+            uwren <= "000";
+            urden <= "111";
+            uaddr <= "000000";
+            wrden <= '1';
+            wwren <= '0';
+            waddr <= "00";
+            asig <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+
         ELSIF (reset = '1') THEN
             mode <= idle;
 
@@ -139,15 +152,22 @@ BEGIN
                 waddr <= "01"; --prep for next load
             ELSIF (mode = t_go AND wLoaded = 1) THEN
                 mmuLdWSig <= '1';
+                mmuStallSig <= '0';
+                auStallSig <= '0';
                 wLoaded <= 2;
                 waddr <= "10";
 
             ELSIF (mode = t_go AND wLoaded = 2) THEN
-                mmuLdWSig <= '0';
+                --mmuLdWSig <= '0';
                 wLoaded <= 3;
                 waddr <= "00";
+            elsif (mode = t_go AND wLoaded = 3) then
+                wLoaded <= 4;
+                mmuLdWSig <= '0';
             END IF;
         END IF;
+        --mmuStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
+        --auStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
     END PROCESS;
 
 END structure;

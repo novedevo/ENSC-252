@@ -39,12 +39,11 @@ BEGIN
             IF (ld = '1') THEN
                 Asig <= a_in;
             END IF;
-            --Wsig <= w_in WHEN (ld_w = '1');
-            --Asig <= a_in WHEN (ld = '1');
+
             Ysig <= rounded;
         END IF;
-    END PROCESS;
 
+    END PROCESS;
     a_out <= Asig;
     partial_sum <= Ysig;
 
