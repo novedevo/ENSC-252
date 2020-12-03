@@ -12,7 +12,7 @@ ENTITY weight_loading_fsm IS
 END ENTITY;
 
 ARCHITECTURE behaviour OF weight_loading_fsm IS
-    SIGNAL state : t_wlf_state := idle;
+    SIGNAL state, next_state: t_wlf_state := idle;
     SIGNAL resets : STD_LOGIC;
 BEGIN
 
@@ -22,36 +22,31 @@ BEGIN
     BEGIN
         IF (reset = '1' OR hard_reset = '1') THEN
             state <= idle;
+            --ld_w <= "000000000";
         ELSIF (rising_edge(clk)) THEN
-            CASE state IS
-                WHEN idle =>
-                    IF (exostate = init AND ld_win = '1') THEN
-                        state <= load_col0;
-                    END IF;
-                WHEN load_col0 =>
-                    state <= load_col1;
-                WHEN load_col1 =>
-                    state <= load_col2;
-                WHEN load_col2 =>
-                    state <= idle;
-            END CASE;
+            state <= next_state;
         END IF;
     END PROCESS;
 
-    PROCESS (state) IS
+    PROCESS (state, exostate, ld_win) IS
     BEGIN
         CASE state IS
             WHEN idle =>
                 IF (exostate = init AND ld_win = '1') THEN
-                    ld_w <= "111000000";
-                else ld_w <= "000000000";
+                    ld_w <= "000000111";
+                    next_state <= load_col0;
+                ELSE
+                    ld_w <= "000000000";
                 END IF;
             WHEN load_col0 =>
                 ld_w <= "000111000";
+                next_state <= load_col1;
             WHEN load_col1 =>
-                ld_w <= "000000111";
+                ld_w <= "111000000";
+                next_state <= load_col2;
             WHEN load_col2 =>
                 ld_w <= "000000000";
+                next_state <= idle;
         END CASE;
     END PROCESS;
 END behaviour;

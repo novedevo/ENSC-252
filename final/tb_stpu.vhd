@@ -19,7 +19,7 @@ ARCHITECTURE test OF tb_stpu IS
     CONSTANT HALF_PERIOD : TIME := 5 ns;
     CONSTANT PERIOD : TIME := 10 ns;
 
-    SIGNAL clksig : STD_LOGIC := '0';
+    SIGNAL clksig : STD_LOGIC := '1';
 
     SIGNAL resetsig, hard_resetsig, setupsig, GOsig, stallsig : STD_LOGIC;
     SIGNAL weightsig, a_insig : unsigned (23 DOWNTO 0);
