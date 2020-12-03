@@ -19,6 +19,8 @@ ARCHITECTURE test OF tb_mmu IS
     CONSTANT HALF_PERIOD : TIME := 5 ns;
     CONSTANT PERIOD : TIME := 10 ns;
 
+    signal row_1, row_2, row_3, wrow_1, wrow_2, wrow_3 : int_bus;
+
     SIGNAL clksig : STD_LOGIC := '1';
     SIGNAL resetsig, hard_resetsig, ldsig, ld_wsig, stallsig : STD_LOGIC := '0';
 
@@ -28,6 +30,14 @@ ARCHITECTURE test OF tb_mmu IS
     SIGNAL intysig, intwsig, intasig : int_bus;
 
 BEGIN
+
+    wrow_1 <= (2,3,4);
+    wrow_2 <= (5,6,7);
+    wrow_3 <= (8,9,10);
+
+    row_1 <= (2,2,3);
+    row_2 <= (4,5,6);
+    row_3 <= (7,8,9);
 
     clksig <= NOT clksig AFTER half_period;
     DUT : matrix_multiplication_unit
@@ -43,60 +53,51 @@ BEGIN
     wsig(1) <= to_unsigned(intwsig(1), 8);
     wsig(2) <= to_unsigned(intwsig(2), 8);
 
-    ysig(0) <= to_unsigned(intysig(0), 8);
-    ysig(1) <= to_unsigned(intysig(1), 8);
-    ysig(2) <= to_unsigned(intysig(2), 8);
+    asig(0) <= to_unsigned(intasig(0), 8);
+    asig(1) <= to_unsigned(intasig(1), 8);
+    asig(2) <= to_unsigned(intasig(2), 8);
 
-    
 
     PROCESS IS
     BEGIN
 
         resetsig <= '1';
         hard_resetsig <= '1';
+        intasig <= (0,0,0);
         WAIT FOR period;
         resetsig <= '0';
         hard_resetsig <= '0';
         WAIT FOR period;
         ld_wsig <= '1';
 
-        intwsig <= (1,2,3);
-        WAIT FOR period;
-        intwsig <= (4,5,6);
-        WAIT FOR period;
-        intwsig <= (7,8,9);
+        -- intwsig <= (wrow_1(0), wrow_2(0), wrow_3(0));
+        -- WAIT FOR period;
+        -- intwsig <= (wrow_1(1), wrow_2(1), wrow_3(1));
+        -- WAIT FOR period;
+        -- intwsig <= (wrow_1(2), wrow_2(2), wrow_3(2));
+
+        intwsig <= wrow_1;
+        wait for period;
+        intwsig <= wrow_2;
+        wait for period;
+        intwsig <= wrow_3;
         WAIT FOR period;
         intwsig <= (0,0,0);
         ld_wsig <= '0';
         WAIT FOR 10 * period;
         ldsig <= '1';
-        intasig <= (10, 11, 12);
+        intasig <= (row_1(0), 0, 0);
         WAIT FOR period;
-        intasig <= (13, 14, 15);
+        intasig <= (row_1(1), row_2(0), 0);
         WAIT FOR period;
-        intasig <= (16, 17, 18);
+        intasig <= (row_1(2), row_2(1), row_3(0));
         WAIT FOR period;
-        ldsig <= '0';
+        intasig <= (0, row_2(2), row_3(1));
+        WAIT FOR period;
+        intasig <= (0,0,row_3(2));
+        WAIT FOR period;
+        --ldsig <= '0';
         intasig <= (0,0,0);
-
-        -- wsig <= (to_unsigned(1, 8), to_unsigned(2, 8), to_unsigned(3, 8));
-        -- WAIT FOR period;
-        -- wsig <= (to_unsigned(4, 8), to_unsigned(5, 8), to_unsigned(6, 8));
-        -- WAIT FOR period;
-        -- wsig <= (to_unsigned(7, 8), to_unsigned(8, 8), to_unsigned(9, 8));
-        -- WAIT FOR period;
-        -- wsig <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-        -- ld_wsig <= '0';
-        -- WAIT FOR 10 * period;
-        -- ldsig <= '1';
-        -- asig <= (to_unsigned(10, 8), to_unsigned(11, 8), to_unsigned(12, 8));
-        -- WAIT FOR period;
-        -- asig <= (to_unsigned(13, 8), to_unsigned(14, 8), to_unsigned(15, 8));
-        -- WAIT FOR period;
-        -- asig <= (to_unsigned(16, 8), to_unsigned(17, 8), to_unsigned(18, 8));
-        -- WAIT FOR period;
-        -- ldsig <= '0';
-        -- intasig <= (0,0,0);
 
         WAIT;
 

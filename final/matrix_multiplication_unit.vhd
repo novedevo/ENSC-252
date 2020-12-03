@@ -52,14 +52,6 @@ BEGIN
     --2  5  8
     --
 
-    --load weights in the first column, then second column, then third column
-    --ld_wsig(2 DOWNTO 0) <= "111" WHEN state = load_col0 ELSE
-    --"000";
-    --ld_wsig(5 DOWNTO 3) <= "111" WHEN state = load_col1 ELSE
-    --"000";
-    --ld_wsig(8 DOWNTO 6) <= "111" WHEN state = load_col2 ELSE
-    --"000";
-
     --apply the input weights to all elements in each row so that they can be latched by the PEs when ld_w is called
     w_insig(2 DOWNTO 0) <= (w2, w1, w0);
     w_insig(5 DOWNTO 3) <= (w2, w1, w0);
@@ -92,13 +84,6 @@ BEGIN
             state <= compute;
         END IF;
     END PROCESS;
-
-    PROCESS (clk, stall) IS
-    BEGIN
-        IF (rising_edge(clk)) THEN
-            IF (stall = '0' AND ld = '1') THEN
-                ldsig(8 DOWNTO 0) <= "111111111";
-            END IF;
-        END IF;
-    END PROCESS;
+    
+    ldSig <= "111111111" when (ld = '1' and stall = '0') else "000000000";
 END structure;
