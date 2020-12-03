@@ -38,9 +38,10 @@ BEGIN
             END IF;
             IF (ld = '1') THEN
                 Asig <= a_in;
+                Ysig <= rounded;
             END IF;
 
-            Ysig <= rounded;
+            
         END IF;
 
     END PROCESS;

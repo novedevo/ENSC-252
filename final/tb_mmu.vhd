@@ -96,8 +96,12 @@ BEGIN
         WAIT FOR period;
         intasig <= (0,0,row_3(2));
         WAIT FOR period;
-        --ldsig <= '0';
         intasig <= (0,0,0);
+        stallsig <= '1';
+        wait for 10*period;
+        stallsig <= '0';
+        --ldsig <= '0';
+        --intasig <= (0,0,0);
 
         WAIT;
 
