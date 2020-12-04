@@ -19,17 +19,28 @@ ARCHITECTURE test OF tb_stpu IS
     CONSTANT HALF_PERIOD : TIME := 5 ns;
     CONSTANT PERIOD : TIME := 10 ns;
 
-    SIGNAL clksig : STD_LOGIC := '1';
+    SIGNAL clksig : STD_LOGIC := '0';
 
     SIGNAL resetsig, hard_resetsig, setupsig, GOsig, stallsig : STD_LOGIC;
     SIGNAL weightsig, a_insig : unsigned (23 DOWNTO 0);
     SIGNAL y0sig, y1sig, y2sig : bus_width;
+
+signal intweightsig : int_bus := (0,0,0);
+signal intasig : int_bus := (0,0,0);
 
 BEGIN
 
     DUT : stpu PORT MAP(clksig, resetsig, hard_resetsig, setupsig, GOsig, stallsig, weightsig, a_insig, y0sig, y1sig, y2sig);
 
     clksig <= NOT clksig AFTER HALF_PERIOD;
+
+    weightsig(23 downto 16) <= to_unsigned(intweightsig(0), 8);
+    weightsig(15 downto 8) <= to_unsigned(intweightsig(1), 8);
+    weightsig(7 downto 0) <= to_unsigned(intweightsig(2), 8);
+
+    a_insig(23 downto 16) <= to_unsigned(intasig(0), 8);
+    a_insig(15 downto 8) <= to_unsigned(intasig(1), 8);
+    a_insig(7 downto 0) <= to_unsigned(intasig(2), 8);
 
     PROCESS IS
     BEGIN
@@ -38,8 +49,7 @@ BEGIN
         setupsig <= '0';
         gosig <= '0';
         stallsig <= '0';
-        weightsig <= to_unsigned(0, 24);
-        a_insig <= to_unsigned (0, 24);
+
         WAIT FOR period;
         hard_resetsig <= '0';
         resetsig <= '0';
@@ -47,14 +57,18 @@ BEGIN
         wait for period;
         setupsig <= '0';
 
-        weightsig <= (to_unsigned(1, 8) & to_unsigned(0, 16));
-        a_insig <= (to_unsigned(1, 8) & to_unsigned(0, 16));
+        intweightsig <= (1,2,3);
+        intasig <= (1,1,4);
         wait for period;
-        weightsig <= (to_unsigned(0, 8) & to_unsigned(1, 8) & to_unsigned(0, 8));
-        a_insig <= (to_unsigned(0, 8) & to_unsigned(1, 8) & to_unsigned(0, 8));
+        intweightsig <= (1,1,1);
+        intasig <= (2,1,5);
         wait for period;
-        weightsig <= (to_unsigned(0, 16) & to_unsigned(1, 8));
-        a_insig <= (to_unsigned(0, 16) & to_unsigned(1, 8));
+        intweightsig <= (4,5,6);
+        intasig <= (3,1,6);
+
+        wait for period;
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
         
         wait for 10*period;
 

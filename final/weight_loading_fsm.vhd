@@ -29,6 +29,7 @@ BEGIN
     END PROCESS;
 
     PROCESS (state, exostate, ld_win) IS
+    --PROCESS (state) IS
     BEGIN
         CASE state IS
             WHEN idle =>
