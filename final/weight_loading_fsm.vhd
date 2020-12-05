@@ -13,10 +13,8 @@ END ENTITY;
 
 ARCHITECTURE behaviour OF weight_loading_fsm IS
     SIGNAL state, next_state: t_wlf_state := idle;
-    SIGNAL resets : STD_LOGIC;
 BEGIN
 
-    resets <= (reset OR hard_reset);
 
     PROCESS (reset, hard_reset, clk) IS
     BEGIN

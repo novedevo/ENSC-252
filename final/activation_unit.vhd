@@ -25,7 +25,7 @@ BEGIN
             --sigRow0 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
             ---sigRow1 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
             --sigRow2 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-        ELSIF (rising_edge(clk) AND state = 9) THEN
+        ELSIF (rising_edge(clk) AND state = 9 and stall = '0') THEN
             state <= 0;
         ELSIF (rising_edge(clk) AND stall = '0') THEN
             state <= state + 1;
