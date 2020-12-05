@@ -175,24 +175,48 @@ BEGIN
             ELSIF (mode = t_go AND aLoaded = 1) THEN
                 aLoaded <= 2;
                 uaddr <= "110001";
+                
 
                 auStallSig <= '0';
             ELSIF (mode = t_go AND aLoaded = 2) THEN
                 aLoaded <= 3;
                 uaddr <= "000110";
+                aSig(0) <= unsigned(uq0);
+
+                asig(1) <= unsigned(uq1);
+                asig(2) <= unsigned(uq2);
+
+                
 
                 mmuLdSig <= '1';
             ELSIF (mode = t_go AND aLoaded = 3) THEN
                 aLoaded <= 4;
                 uaddr <= "011011";
+
+                asig(0) <= unsigned(uq1);
+                asig(1) <= unsigned(uq0);
+
+                asig(2) <= unsigned(uq2);
             ELSIF (mode = t_go AND aLoaded = 4) THEN
                 aLoaded <= 5;
                 uaddr <= "101111";
+                asig(0) <= unsigned(uq2);
+                asig(1) <= unsigned(uq1);
+                asig(2) <= unsigned(uq0);
             ELSIF (mode = t_go AND aLoaded = 5) THEN
                 aLoaded <= 6;
                 uaddr <= "111111";
+                asig(0) <= unsigned(uq0);
+
+
+                asig(1) <= unsigned(uq2);
+                asig(2) <= unsigned(uq1);
             ELSIF (mode = t_go AND aLoaded = 6) THEN
                 aLoaded <= 0;
+                asig(0) <= unsigned(uq1);
+                asig(1) <= unsigned(uq0);
+
+                asig(2) <= unsigned(uq2);
                 --mmuLdSig <= '0';
             END IF;
         END IF;
@@ -200,8 +224,8 @@ BEGIN
         --auStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
     END PROCESS;
 
-    asig(0) <= unsigned(uq0);
-    asig(1) <= unsigned(uq1);
-    asig(2) <= unsigned(uq2);
+    --asig(0) <= unsigned(uq0);
+    --asig(1) <= unsigned(uq1);
+    --asig(2) <= unsigned(uq2);
 
 END structure;

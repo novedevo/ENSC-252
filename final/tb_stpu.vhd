@@ -58,13 +58,13 @@ BEGIN
         setupsig <= '0';
 
         intweightsig <= (1,2,3);
-        intasig <= (1,1,4);
+        intasig <= (1,2,3);
         wait for period;
         intweightsig <= (1,1,1);
-        intasig <= (2,1,5);
+        intasig <= (1,1,1);
         wait for period;
         intweightsig <= (4,5,6);
-        intasig <= (3,1,6);
+        intasig <= (4,5,6);
 
         wait for period;
         intweightsig <= (0,0,0);
