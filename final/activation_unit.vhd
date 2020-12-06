@@ -22,9 +22,9 @@ BEGIN
     BEGIN
         IF (hard_reset = '1' OR reset = '1') THEN
             state <= 0;
-            --sigRow0 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-            ---sigRow1 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-            --sigRow2 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+            sigRow0 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+            sigRow1 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+            sigRow2 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
         ELSIF (rising_edge(clk) AND state = 4 and stall = '0') THEN
             state <= 0;
         ELSIF (rising_edge(clk) AND stall = '0') THEN

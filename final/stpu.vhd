@@ -70,11 +70,12 @@ ARCHITECTURE structure OF stpu IS
     SIGNAL mmuStallSig : STD_LOGIC := '1';
     SIGNAL auStallSig : STD_LOGIC := '1';
 
-    --consider setting all these to 0 initially
-    SIGNAL uwren, urden : STD_LOGIC_VECTOR(2 DOWNTO 0);
-    SIGNAL uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0);
-    SIGNAL wrden, wwren : STD_LOGIC;
-    SIGNAL waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL uwren : std_logic_vector(2 downto 0) := "000";
+    signal urden : STD_LOGIC_VECTOR(2 DOWNTO 0) := "111";
+    SIGNAL uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0) := "000000";
+    SIGNAL wrden : std_logic := '1';
+    signal wwren : STD_LOGIC := '0';
+    SIGNAL waddr : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
     SIGNAL uq0, uq1, uq2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
     SIGNAL wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
 
@@ -113,12 +114,11 @@ BEGIN
             wrden <= '1';
             wwren <= '0';
             waddr <= "00";
-            --asig <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
 
         ELSIF (reset = '1') THEN
             mode <= idle;
 
-        ELSIF (falling_edge(clk)) THEN --falling edge to align it better with the sram
+        ELSIF (falling_edge(clk) AND stall = '0') THEN --falling edge to align it better with the sram
 
             IF (setup = '1' AND (mode = idle)) THEN
                 mode <= t_setup;
@@ -163,16 +163,20 @@ BEGIN
                 --mmuLdWSig <= '0';
                 wLoaded <= 3;
                 waddr <= "11";
+
+                aLoaded <= 1;
+                
+                uaddr <= "111100";
             ELSIF (mode = t_go AND wLoaded = 3) THEN
                 wLoaded <= 4;
                 mmuLdWSig <= '0';
 
             ELSIF (mode = t_go AND wLoaded = 4) THEN
                 wLoaded <= 0;
-                aLoaded <= 1;
-                uaddr <= "111100";
+                --aLoaded <= 1;
 
-            ELSIF (mode = t_go AND aLoaded = 1) THEN
+            END IF;
+            IF (mode = t_go AND aLoaded = 1) THEN
                 aLoaded <= 2;
                 uaddr <= "110001";
 
@@ -181,8 +185,8 @@ BEGIN
                 uaddr <= "000110";
                 aSig(0) <= unsigned(uq0);
 
-                asig(1) <= unsigned(uq1);
-                asig(2) <= unsigned(uq2);
+                asig(1) <= unsigned(uq2);
+                asig(2) <= unsigned(uq1);
 
                 mmuLdSig <= '1';
             ELSIF (mode = t_go AND aLoaded = 3) THEN
@@ -207,14 +211,28 @@ BEGIN
                 asig(1) <= unsigned(uq2);
                 asig(2) <= unsigned(uq1);
             ELSIF (mode = t_go AND aLoaded = 6) THEN
-                aLoaded <= 0;
+                aLoaded <= 7;
                 asig(0) <= unsigned(uq1);
                 asig(1) <= unsigned(uq0);
 
                 asig(2) <= unsigned(uq2);
+            ELSIF (mode = t_go AND aLoaded = 7) THEN
+                aLoaded <= 0;
+                asig <= (unsigned(uq0), unsigned(uq2), unsigned(uq1));
                 --mmuLdSig <= '0';
             END IF;
+
+        elsif (donesig = '1') then
+            mmuStallSig <= '1';
+            auStallSig <= '1';
+            mode <= idle;
+
+        elsif (stall = '1') then
+            mmuStallSig <= '1';
+            auStallSig <= '1';
+
         END IF;
+
         --mmuStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
         --auStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
     END PROCESS;
