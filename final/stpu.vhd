@@ -58,8 +58,10 @@ ARCHITECTURE structure OF stpu IS
 
     SIGNAL mode : t_MODE_STATE;
     SIGNAL ramLoaded : t_WEIGHT_STATE;
-    SIGNAL wLoaded : INTEGER := 0;
-    SIGNAL aLoaded : INTEGER := 0;
+    SIGNAL wLoaded : INTEGER RANGE 0 TO 4 := 0;
+    SIGNAL aLoaded : INTEGER RANGE 0 TO 7 := 0;
+
+    signal temp : std_logic_vector(1 downto 0) := "00";
 
     SIGNAL donesig, mmuLdSig, mmuLdWSig : STD_LOGIC;
     SIGNAL ysig, wsig : bus_width;
@@ -70,11 +72,11 @@ ARCHITECTURE structure OF stpu IS
     SIGNAL mmuStallSig : STD_LOGIC := '1';
     SIGNAL auStallSig : STD_LOGIC := '1';
 
-    SIGNAL uwren : std_logic_vector(2 downto 0) := "000";
-    signal urden : STD_LOGIC_VECTOR(2 DOWNTO 0) := "111";
+    SIGNAL uwren : STD_LOGIC_VECTOR(2 DOWNTO 0) := "000";
+    SIGNAL urden : STD_LOGIC_VECTOR(2 DOWNTO 0) := "111";
     SIGNAL uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0) := "000000";
-    SIGNAL wrden : std_logic := '1';
-    signal wwren : STD_LOGIC := '0';
+    SIGNAL wrden : STD_LOGIC := '1';
+    SIGNAL wwren : STD_LOGIC := '0';
     SIGNAL waddr : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
     SIGNAL uq0, uq1, uq2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
     SIGNAL wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
@@ -165,7 +167,7 @@ BEGIN
                 waddr <= "11";
 
                 aLoaded <= 1;
-                
+
                 uaddr <= "111100";
             ELSIF (mode = t_go AND wLoaded = 3) THEN
                 wLoaded <= 4;
@@ -220,17 +222,22 @@ BEGIN
                 aLoaded <= 0;
                 asig <= (unsigned(uq0), unsigned(uq2), unsigned(uq1));
                 --mmuLdSig <= '0';
+
+            END IF;
+            IF (donesig = '1') THEN
+                mmuStallSig <= '1';
+                auStallSig <= '1';
+                mode <= idle;
             END IF;
 
-        elsif (donesig = '1') then
+        ELSIF (rising_edge(stall)) THEN
+            temp <= (mmuStallSig & auStallSig);
             mmuStallSig <= '1';
             auStallSig <= '1';
-            mode <= idle;
-
-        elsif (stall = '1') then
-            mmuStallSig <= '1';
-            auStallSig <= '1';
-
+        ELSIF (falling_edge(stall)) THEN
+            mmuStallSig <= temp(0);
+            austallsig <= temp(1);
+            --END IF;
         END IF;
 
         --mmuStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
