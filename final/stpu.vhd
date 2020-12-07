@@ -94,15 +94,29 @@ ARCHITECTURE structure OF stpu IS
     SIGNAL uq0, uq1, uq2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
     SIGNAL wq : STD_LOGIC_VECTOR(23 DOWNTO 0);
     SIGNAL mwf_done : STD_LOGIC := '0';
-    signal mwf_uaddr : std_logic_vector(5 downto 0);
-    signal mwf_waddr : std_logic_vector(1 downto 0);
-    signal go_uaddr : std_logic_vector(5 downto 0) := "000000";
-    signal go_waddr : std_logic_vector(1 downto 0) := "00";
+    SIGNAL mwf_uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0);
+    SIGNAL mwf_waddr : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL go_uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0) := "000000";
+    SIGNAL go_waddr : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
+
+    --SIGNAL wBuffer : STD_LOGIC_VECTOR(23 DOWNTO 0) := "000000000000000000000000";--bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+    --SIGNAL uBuffer : bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+
+    SIGNAL usig : bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
+
+    --SIGNAL continue : INTEGER RANGE 0 TO 4 := 0;
+
+    --SIGNAL wtemp : wtemp_bus := (wBuffer, wBuffer, wBuffer);
+    --SIGNAL utemp : utemp_bus := (uBuffer, uBuffer, uBuffer);
+    --SIGNAL stalled : INTEGER RANGE 0 TO 4 := 0;
 
 BEGIN
 
     resetSig <= reset OR hard_reset;
-    wsig <= (unsigned(wq(23 DOWNTO 16)), unsigned(wq(15 DOWNTO 8)), unsigned(wq(7 DOWNTO 0)));
+    wsig <= (unsigned(wq(23 DOWNTO 16)), unsigned(wq(15 DOWNTO 8)), unsigned(wq(7 DOWNTO 0)));-- WHEN continue = 0 ELSE
+        --(unsigned(wBuffer(23 DOWNTO 16)), unsigned(wBuffer(15 DOWNTO 8)), unsigned(wBuffer(7 DOWNTO 0)));--wBuffer;
+    usig <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));--WHEN continue = 0;-- ELSE
+        --uBuffer;
 
     --instantiate components
     au : activation_unit
@@ -126,8 +140,10 @@ BEGIN
         clk, reset, hard_reset, wwren, mwf_waddr,
         uwren, mwf_uaddr, mwf_done, setup, stall, mode);
 
-uaddr <= mwf_uaddr when mode = t_setup else go_uaddr;
-waddr <= mwf_waddr when mode = t_setup else go_waddr;
+    uaddr <= mwf_uaddr WHEN mode = t_setup ELSE
+        go_uaddr;
+    waddr <= mwf_waddr WHEN mode = t_setup ELSE
+        go_waddr;
 
     PROCESS (clk, reset, hard_reset) IS
     BEGIN
@@ -150,33 +166,11 @@ waddr <= mwf_waddr when mode = t_setup else go_waddr;
             IF (stall = '0') THEN --and continue = '0'
                 IF (setup = '1' AND (mode = idle)) THEN
                     mode <= t_setup;
-                    --wwren <= '1';
-                    --ramLoaded <= first;
-                    --waddr <= "00";
 
-                    --uwren <= "111";
-                    --uaddr <= "000000";
-
-                    --ELSIF (mode = t_setup AND ramLoaded = first) THEN
-                    --waddr <= "01";
-                    --uaddr <= "010101";
-                    --ramLoaded <= second;
-                    --ELSIF (mode = t_setup AND ramLoaded = second) THEN
-                    --waddr <= "10";
-                    --uaddr <= "101010";
-                    --ramLoaded <= done;
-
-                    --ELSIF (mode = t_setup AND ramLoaded = done) THEN
-                    --waddr <= "00";
-                    --uaddr <= "111111";
-                    --wwren <= '0';
-                    --uwren <= "000";
-                    --mode <= idle;
-                ELSIF (mwf_done = '1' AND mode = t_setup and go = '0') THEN
+                ELSIF (mwf_done = '1' AND mode = t_setup AND go = '0') THEN
                     mode <= idle;
-                
 
-                elsIF (go = '1' AND (mode = idle or mwf_done = '1')) THEN
+                ELSIF (go = '1' AND (mode = idle OR mwf_done = '1')) THEN
                     mode <= t_go;
 
                     wLoaded <= 1;
@@ -214,42 +208,42 @@ waddr <= mwf_waddr when mode = t_setup else go_waddr;
                 ELSIF (mode = t_go AND aLoaded = 2) THEN
                     aLoaded <= 3;
                     go_uaddr <= "000110";
-                    aSig(0) <= unsigned(uq0);
+                    aSig(0) <= uSig(0);
 
-                    asig(1) <= unsigned(uq2);
-                    asig(2) <= unsigned(uq1);
+                    asig(1) <= uSig(2);
+                    asig(2) <= uSig(1);
 
                     mmuLdSig <= '1';
                 ELSIF (mode = t_go AND aLoaded = 3) THEN
                     aLoaded <= 4;
                     go_uaddr <= "011011";
 
-                    asig(0) <= unsigned(uq1);
-                    asig(1) <= unsigned(uq0);
+                    asig(0) <= uSig(1);
+                    asig(1) <= uSig(0);
 
-                    asig(2) <= unsigned(uq2);
+                    asig(2) <= uSig(2);
                 ELSIF (mode = t_go AND aLoaded = 4) THEN
                     aLoaded <= 5;
                     go_uaddr <= "101111";
-                    asig(0) <= unsigned(uq2);
-                    asig(1) <= unsigned(uq1);
-                    asig(2) <= unsigned(uq0);
+                    asig(0) <= uSig(2);
+                    asig(1) <= uSig(1);
+                    asig(2) <= uSig(0);
                 ELSIF (mode = t_go AND aLoaded = 5) THEN
                     auStallSig <= '0';
                     aLoaded <= 6;
                     go_uaddr <= "111111";
-                    asig(0) <= unsigned(uq0);
-                    asig(1) <= unsigned(uq2);
-                    asig(2) <= unsigned(uq1);
+                    asig(0) <= uSig(0);
+                    asig(1) <= uSig(2);
+                    asig(2) <= uSig(1);
                 ELSIF (mode = t_go AND aLoaded = 6) THEN
                     aLoaded <= 7;
-                    asig(0) <= unsigned(uq1);
-                    asig(1) <= unsigned(uq0);
+                    asig(0) <= uSig(1);
+                    asig(1) <= uSig(0);
 
-                    asig(2) <= unsigned(uq2);
+                    asig(2) <= uSig(2);
                 ELSIF (mode = t_go AND aLoaded = 7) THEN
                     aLoaded <= 0;
-                    asig <= (unsigned(uq0), unsigned(uq2), unsigned(uq1));
+                    asig <= (uSig(0), uSig(2), uSig(1));
                     --mmuLdSig <= '0';
 
                 END IF;
@@ -259,18 +253,61 @@ waddr <= mwf_waddr when mode = t_setup else go_waddr;
                     auStallSig <= '1';
                     mode <= idle;
                 END IF;
-
-            ELSIF (stall = '1' AND temp(2) = '0') THEN
-                temp <= (mmuStallSig & auStallSig & '1');
-                mmuStallSig <= '1';
-                auStallSig <= '1';
-                --continue <= '1';
-                --wtemp <= wq; ASDASDAKJSHDGAKLSDHKAJSHD--###CONTINUE FROM HERE 
-            ELSIF (stall = '0' AND temp(2) = '1') THEN
-                mmuStallSig <= temp(0);
-                austallsig <= temp(1);
-                temp <= "000";
             END IF;
+            -- IF (continue = 1) THEN
+            --     continue <= 0;
+
+            --     stalled <= 0;
+            -- ELSIF (continue = 2) THEN
+            --     continue <= 1;
+            --     wBuffer <= wtemp(0);
+            --     ubuffer <= utemp(0);
+            -- ELSIF (continue = 3) THEN
+            --     continue <= 2;
+            --     wBuffer <= wtemp(1);
+            --     uBuffer <= utemp(1);
+            -- ELSIF (continue = 4) THEN
+            --     continue <= 3;
+            --     wBuffer <= wtemp(2);
+            --     uBuffer <= utemp(2);
+            -- END IF;
+
+            -- IF (stalled = 1 AND continue = 0) THEN
+            --     IF (stall = '1') THEN
+            --         stalled <= 2;
+            --         wtemp(1) <= wq;
+            --         utemp(1) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
+            --     ELSE
+            --         continue <= 2;
+            --         stalled <= 0;
+            --     END IF;
+            -- ELSIF (stalled = 2 AND continue = 0) THEN
+            --     IF (stall = '1') THEN
+            --         stalled <= 3;
+            --         wtemp(2) <= wq;
+            --         utemp(2) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
+            --     ELSE
+            --         continue <= 3;
+            --         wBuffer <= wtemp(0);
+            --         uBuffer <= utemp(0);
+            --     END IF;
+            -- ELSIF (stalled = 3 AND continue = 0) THEN
+            --     IF (stall = '0') THEN
+            --         continue <= 4;
+            --     END IF;
+            -- ELSIF (stall = '1' AND temp(2) = '0') THEN
+            --     temp <= (mmuStallSig & auStallSig & '1');
+            --     mmuStallSig <= '1';
+            --     auStallSig <= '1';
+            --     stalled <= 1;
+            --     wtemp(0) <= wq;
+            --     utemp(0) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
+            -- ELSIF (stall = '0' AND temp(2) = '1') THEN
+            --     mmuStallSig <= temp(0);
+            --     austallsig <= temp(1);
+            --     temp <= "000";
+            -- END IF;
+            --END IF;
         END IF;
 
         --mmuStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
