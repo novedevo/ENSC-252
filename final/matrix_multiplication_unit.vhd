@@ -32,6 +32,7 @@ ARCHITECTURE structure OF matrix_multiplication_unit IS
             clk, reset, hard_reset : IN STD_LOGIC;
             ld_w : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
             ld_win : IN STD_LOGIC;
+            stall : in std_logic;
             exostate : IN t_mmu_state);
     END COMPONENT;
 
@@ -39,11 +40,13 @@ BEGIN
     --generate the matrix of PE's
     GEN_PE : FOR i IN 0 TO 8 GENERATE
         PE : processing_element
-        PORT MAP(clk, reset, hard_reset, ldsig(i), ld_wsig(i), a_insig(i), w_insig(i), part_insig(i), a_outsig(i), partial_sumsig(i));
+        PORT MAP(clk, reset, hard_reset, ldsig(i), 
+        ld_wsig(i), a_insig(i), w_insig(i), part_insig(i), 
+        a_outsig(i), partial_sumsig(i));
     END GENERATE;
 
     wlf : weight_loading_fsm
-    PORT MAP(clk, reset, hard_reset, ld_wsig, ld_w, state);
+    PORT MAP(clk, reset, hard_reset, ld_wsig, ld_w, stall, state);
 
     --matrix looks like this:
     --
@@ -61,7 +64,7 @@ BEGIN
     a_insig(2 DOWNTO 0) <= (a2, a1, a0);
     a_insig(5 DOWNTO 3) <= a_outsig(2 DOWNTO 0);
     a_insig(8 DOWNTO 6) <= a_outsig(5 DOWNTO 3);
-    --nothing to do with a_outsig(2 downto 0); they are left open.
+    --nothing to do with a_outsig(8 downto 6); they are left open.
 
     partial_aligner : FOR i IN 0 TO 2 GENERATE
         part_insig(3 * i) <= "00000000";

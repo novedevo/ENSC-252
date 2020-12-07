@@ -63,8 +63,8 @@ BEGIN
         intasig <= (1,1,1);
         wait for period;
 
-        stallsig <= '1'; --test stalling during memory writes
-        wait for 10*period;
+        --stallsig <= '1'; --test stalling during memory writes
+        --wait for 10*period;
 
         stallsig <= '0';
         intweightsig <= (4,5,6);
@@ -80,10 +80,10 @@ BEGIN
 
         gosig <= '0';
         wait for period;
-        stallsig <= '1'; --test stalling during init mode
-        wait for period;
-        stallsig <= '0';
-        wait for 3*period;
+        --stallsig <= '1'; --test stalling during init mode
+        --wait for 10*period;
+        --stallsig <= '0';
+        --wait for 3*period;
         --stallsig <= '1'; --test stalling during compute mode --####STALL BREAKS DURING MEMORY READS BECAUSE MEMORY READ LATENCY IS SO HIGH
         --wait for period;
         --stallsig <= '0';

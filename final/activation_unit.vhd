@@ -40,22 +40,26 @@ BEGIN
             sigRow2 <= (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
 
         ELSIF (state = 1) THEN
-
             sigRow0(0) <= y_in0;
+
         ELSIF (state = 2) THEN
             sigRow0(1) <= y_in0;
             sigRow1(0) <= y_in1;
+
         ELSIF (state = 3) THEN
             sigRow0(2) <= y_in0;
             sigRow1(1) <= y_in1;
             sigRow2(0) <= y_in2;
+
         ELSIF (state = 4) THEN
             sigRow1(2) <= y_in1;
             sigRow2(1) <= y_in2;
+
         ELSIF (state = 5) THEN
             sigRow2(2) <= y_in2;
         END IF;
     END PROCESS;
+    
     row0 <= sigRow0;
     row1 <= sigRow1;
     row2 <= sigRow2;

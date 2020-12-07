@@ -8,6 +8,7 @@ ENTITY weight_loading_fsm IS
         clk, reset, hard_reset : IN STD_LOGIC;
         ld_w : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
         ld_win : IN STD_LOGIC;
+        stall : in std_logic;
         exostate : IN t_mmu_state);
 END ENTITY;
 
@@ -20,14 +21,12 @@ BEGIN
     BEGIN
         IF (reset = '1' OR hard_reset = '1') THEN
             state <= idle;
-            --ld_w <= "000000000";
-        ELSIF (rising_edge(clk)) THEN
+        ELSIF (rising_edge(clk) and stall = '0') THEN
             state <= next_state;
         END IF;
     END PROCESS;
 
     PROCESS (state, exostate, ld_win) IS
-    --PROCESS (state) IS
     BEGIN
         CASE state IS
             WHEN idle =>
