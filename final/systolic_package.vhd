@@ -11,7 +11,7 @@ PACKAGE systolic_package IS
     TYPE t_WLF_STATE IS (idle, load_col0, load_col1, load_col2);
     type t_mmu_state IS (idle, init, compute);
     type t_MODE_STATE is (idle, t_setup, t_go);
-    type t_WEIGHT_STATE is (none, first, second, done);
+    type t_WEIGHT_STATE is (idle, first, second, done);
 
     type utemp_bus is array(0 to 2) of bus_width;
     type wtemp_bus is array(0 to 2) of std_logic_vector(23 downto 0);

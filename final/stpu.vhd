@@ -68,9 +68,7 @@ ARCHITECTURE structure OF stpu IS
     END COMPONENT;
 
     --signals
-
     SIGNAL mode : t_MODE_STATE;
-    --SIGNAL ramLoaded : t_WEIGHT_STATE;
     SIGNAL wLoaded : INTEGER RANGE 0 TO 4 := 0;
     SIGNAL aLoaded : INTEGER RANGE 0 TO 7 := 0;
 
@@ -99,31 +97,22 @@ ARCHITECTURE structure OF stpu IS
     SIGNAL go_uaddr : STD_LOGIC_VECTOR(5 DOWNTO 0) := "000000";
     SIGNAL go_waddr : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 
-    --SIGNAL wBuffer : STD_LOGIC_VECTOR(23 DOWNTO 0) := "000000000000000000000000";--bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-    --SIGNAL uBuffer : bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-
     SIGNAL usig : bus_width := (to_unsigned(0, 8), to_unsigned(0, 8), to_unsigned(0, 8));
-
-    --SIGNAL continue : INTEGER RANGE 0 TO 4 := 0;
-
-    --SIGNAL wtemp : wtemp_bus := (wBuffer, wBuffer, wBuffer);
-    --SIGNAL utemp : utemp_bus := (uBuffer, uBuffer, uBuffer);
-    --SIGNAL stalled : INTEGER RANGE 0 TO 4 := 0;
 
 BEGIN
 
     resetSig <= reset OR hard_reset;
-    wsig <= (unsigned(wq(23 DOWNTO 16)), unsigned(wq(15 DOWNTO 8)), unsigned(wq(7 DOWNTO 0)));-- WHEN continue = 0 ELSE
-        --(unsigned(wBuffer(23 DOWNTO 16)), unsigned(wBuffer(15 DOWNTO 8)), unsigned(wBuffer(7 DOWNTO 0)));--wBuffer;
-    usig <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));--WHEN continue = 0;-- ELSE
-        --uBuffer;
+    wsig <= (unsigned(wq(23 DOWNTO 16)), unsigned(wq(15 DOWNTO 8)), unsigned(wq(7 DOWNTO 0)));
+    usig <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
 
     --instantiate components
     au : activation_unit
     PORT MAP(clk, reset, hard_reset, auStallSig, donesig, ysig(0), ysig(1), ysig(2), y0, y1, y2);
 
     mmu : matrix_multiplication_unit
-    PORT MAP(clk, reset, hard_reset, mmuLdSig, mmuLdWSig, mmuStallSig, asig(0), asig(1), asig(2), wsig(0), wsig(1), wsig(2), ysig(0), ysig(1), ysig(2));
+    PORT MAP(
+        clk, reset, hard_reset, mmuLdSig, mmuLdWSig, mmuStallSig,
+        asig(0), asig(1), asig(2), wsig(0), wsig(1), wsig(2), ysig(0), ysig(1), ysig(2));
 
     u0 : uram
     PORT MAP(resetSig, uaddr(1 DOWNTO 0), clk, STD_LOGIC_VECTOR(a_in(23 DOWNTO 16)), urden(0), uwren(0), uq0);
@@ -148,22 +137,17 @@ BEGIN
     PROCESS (clk, reset, hard_reset) IS
     BEGIN
         IF (hard_reset = '1') THEN
-            --ramLoaded <= none;
             mmuLdWSig <= '0';
             mmuLdSig <= '0';
             mode <= idle;
-            --uwren <= "000";
             urden <= "111";
-            --uaddr <= "000000";
             wrden <= '1';
-            --wwren <= '0';
-            --waddr <= "00";
 
         ELSIF (reset = '1') THEN
             mode <= idle;
 
         ELSIF (falling_edge(clk)) THEN --falling edge to align it better with the sram
-            IF (stall = '0') THEN --and continue = '0'
+            IF (stall = '0') THEN
                 IF (setup = '1' AND (mode = idle)) THEN
                     mode <= t_setup;
 
@@ -179,12 +163,10 @@ BEGIN
                     mmuLdWSig <= '1';
 
                     mmuStallSig <= '0';
-                    --auStallSig <= '0';
                     wLoaded <= 2;
                     go_waddr <= "10";
 
                 ELSIF (mode = t_go AND wLoaded = 2) THEN
-                    --mmuLdWSig <= '0';
                     wLoaded <= 3;
                     go_waddr <= "11";
 
@@ -197,7 +179,6 @@ BEGIN
 
                 ELSIF (mode = t_go AND wLoaded = 4) THEN
                     wLoaded <= 0;
-                    --aLoaded <= 1;
 
                 END IF;
 
@@ -244,7 +225,6 @@ BEGIN
                 ELSIF (mode = t_go AND aLoaded = 7) THEN
                     aLoaded <= 0;
                     asig <= (uSig(0), uSig(2), uSig(1));
-                    --mmuLdSig <= '0';
 
                 END IF;
 
@@ -254,68 +234,6 @@ BEGIN
                     mode <= idle;
                 END IF;
             END IF;
-            -- IF (continue = 1) THEN
-            --     continue <= 0;
-
-            --     stalled <= 0;
-            -- ELSIF (continue = 2) THEN
-            --     continue <= 1;
-            --     wBuffer <= wtemp(0);
-            --     ubuffer <= utemp(0);
-            -- ELSIF (continue = 3) THEN
-            --     continue <= 2;
-            --     wBuffer <= wtemp(1);
-            --     uBuffer <= utemp(1);
-            -- ELSIF (continue = 4) THEN
-            --     continue <= 3;
-            --     wBuffer <= wtemp(2);
-            --     uBuffer <= utemp(2);
-            -- END IF;
-
-            -- IF (stalled = 1 AND continue = 0) THEN
-            --     IF (stall = '1') THEN
-            --         stalled <= 2;
-            --         wtemp(1) <= wq;
-            --         utemp(1) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
-            --     ELSE
-            --         continue <= 2;
-            --         stalled <= 0;
-            --     END IF;
-            -- ELSIF (stalled = 2 AND continue = 0) THEN
-            --     IF (stall = '1') THEN
-            --         stalled <= 3;
-            --         wtemp(2) <= wq;
-            --         utemp(2) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
-            --     ELSE
-            --         continue <= 3;
-            --         wBuffer <= wtemp(0);
-            --         uBuffer <= utemp(0);
-            --     END IF;
-            -- ELSIF (stalled = 3 AND continue = 0) THEN
-            --     IF (stall = '0') THEN
-            --         continue <= 4;
-            --     END IF;
-            -- ELSIF (stall = '1' AND temp(2) = '0') THEN
-            --     temp <= (mmuStallSig & auStallSig & '1');
-            --     mmuStallSig <= '1';
-            --     auStallSig <= '1';
-            --     stalled <= 1;
-            --     wtemp(0) <= wq;
-            --     utemp(0) <= (unsigned(uq0), unsigned(uq1), unsigned(uq2));
-            -- ELSIF (stall = '0' AND temp(2) = '1') THEN
-            --     mmuStallSig <= temp(0);
-            --     austallsig <= temp(1);
-            --     temp <= "000";
-            -- END IF;
-            --END IF;
         END IF;
-
-        --mmuStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
-        --auStallSig <= '1' WHEN ((stall = '1') OR (mode = idle));
     END PROCESS;
-
-    --asig(0) <= unsigned(uq0);
-    --asig(1) <= unsigned(uq1);
-    --asig(2) <= unsigned(uq2);
-
 END structure;

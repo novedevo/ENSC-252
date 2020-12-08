@@ -63,6 +63,42 @@ BEGIN
         intasig <= (1,1,1);
         wait for period;
 
+        stallsig <= '1'; --test stalling during memory writes
+        wait for 10*period;
+
+        stallsig <= '0';
+        intweightsig <= (4,5,6);
+        intasig <= (4,5,2);
+        wait for period;
+
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        gosig <= '1';
+        wait for period;
+
+        gosig <= '0';
+        wait for period;
+        wait for 13*period;
+
+
+
+
+        hard_resetsig <= '1'; --test reset capabilities
+        wait for period;
+
+        hard_resetsig <= '0';
+        setupsig <= '1';
+        intweightsig <= (7,2,3);
+        intasig <= (1,2,3);
+        wait for period;
+
+        setupsig <= '0';
+        intweightsig <= (1,2,1);
+        intasig <= (1,1,1);
+        wait for period;
+
         --stallsig <= '1'; --test stalling during memory writes
         --wait for 10*period;
 
@@ -80,14 +116,82 @@ BEGIN
 
         gosig <= '0';
         wait for period;
-        --stallsig <= '1'; --test stalling during init mode
-        --wait for 10*period;
-        --stallsig <= '0';
-        --wait for 4*period;
-        --stallsig <= '1'; --test stalling during compute mode --####STALL BREAKS DURING MEMORY READS BECAUSE MEMORY READ LATENCY IS SO HIGH
-        --wait for period;
-        --stallsig <= '0';
-        
+
+        hard_resetsig <= '1';
+        resetsig <= '1';
+        setupsig <= '0';
+        gosig <= '0';
+        stallsig <= '0';
+        WAIT FOR period;
+
+        hard_resetsig <= '0';
+        resetsig <= '0';
+        setupsig <= '1';
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        setupsig <= '0';
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        stallsig <= '1'; --test stalling during memory writes
+        wait for 10*period;
+
+        stallsig <= '0';
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        gosig <= '1';
+        wait for period;
+
+        gosig <= '0';
+        wait for period;
+        wait for 13*period;
+
+        hard_resetsig <= '1';
+        resetsig <= '1';
+        setupsig <= '0';
+        gosig <= '0';
+        stallsig <= '0';
+        WAIT FOR period;
+
+        hard_resetsig <= '0';
+        resetsig <= '0';
+        setupsig <= '1';
+        intweightsig <= (7,2,3);
+        intasig <= (1,2,3);
+        wait for period;
+
+        setupsig <= '0';
+        intweightsig <= (1,2,1);
+        intasig <= (1,1,1);
+        wait for period;
+
+        stallsig <= '1'; --test stalling during memory writes
+        wait for 10*period;
+
+        stallsig <= '0';
+        intweightsig <= (4,5,6);
+        intasig <= (99,99,99);
+        wait for period;
+
+        intweightsig <= (0,0,0);
+        intasig <= (0,0,0);
+        wait for period;
+
+        gosig <= '1';
+        wait for period;
+
+        gosig <= '0';
+        wait for period;
+        wait for 13*period;
         
         WAIT;
     END PROCESS;

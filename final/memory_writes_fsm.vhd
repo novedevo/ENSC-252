@@ -9,7 +9,7 @@ ENTITY memory_writes_fsm IS
         wwren_out : OUT STD_LOGIC;
         waddr_out : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         uwren_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-        uaddr_out : OUT STD_LOGIC_vector(5 downto 0);
+        uaddr_out : OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
         mwf_done : OUT STD_LOGIC;
         setup : IN STD_LOGIC;
         stall : IN STD_LOGIC;
@@ -17,13 +17,13 @@ ENTITY memory_writes_fsm IS
 END ENTITY;
 
 ARCHITECTURE behaviour OF memory_writes_fsm IS
-    SIGNAL ramLoaded : t_weight_state := none;
+    SIGNAL ramLoaded : t_weight_state := idle;
 BEGIN
 
     PROCESS (clk, hard_reset) IS
     BEGIN
         IF (hard_reset = '1') THEN
-            ramLoaded <= none;
+            ramLoaded <= done;
             uwren_out <= "000";
             uaddr_out <= "000000";
             wwren_out <= '0';
@@ -31,7 +31,7 @@ BEGIN
             mwf_done <= '0';
 
         ELSIF (falling_edge(clk)) THEN --falling edge to align it better with the sram
-            IF (stall = '0') THEN --and continue = '0'
+            IF (stall = '0') THEN 
                 IF (setup = '1' AND (exostate = idle)) THEN
                     wwren_out <= '1';
                     ramLoaded <= first;
@@ -55,6 +55,10 @@ BEGIN
                     wwren_out <= '0';
                     uwren_out <= "000";
                     mwf_done <= '1';
+                    ramLoaded <= idle;
+                END IF;
+                IF (ramLoaded = idle) THEN
+                    mwf_done <= '0';
                 END IF;
             END IF;
         END IF;
