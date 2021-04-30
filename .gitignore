@@ -9,3 +9,5 @@
 *.bak
 *.png
 final/final_nativelink_simulation.rpt
+*.vsdx
+*.pdf
